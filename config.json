@@ -1,0 +1,22 @@
+{
+  "_comment": "JARVIS Configuration — fill in your API keys here",
+
+  "user_name"             : "Praneeth",
+  "city"                  : "Coimbatore",
+
+  "openai_api_key"        : "sk-XXXXXXXXXXXXXXXXXXXXXXXX",
+  "openweather_api_key"   : "GET_FREE_KEY_AT_openweathermap.org",
+  "newsapi_key"           : "GET_FREE_KEY_AT_newsapi.org",
+
+  "spotify_client_id"     : "GET_FROM_developer.spotify.com",
+  "spotify_client_secret" : "GET_FROM_developer.spotify.com",
+
+  "stt_backend"           : "google",
+  "wake_backend"          : "sr",
+  "tts_rate"              : 175,
+  "tts_volume"            : 0.9,
+
+  "face_auth_enabled"     : false,
+  "news_country"          : "in",
+  "news_category"         : "technology"
+}
