@@ -82,7 +82,7 @@ pip install -r requirements.txt
 
 ### Step 4 — Edit config.json
 
-Open `config.json` and paste your keys. Change `city` to your city.
+Open `config.json` and add your local API keys, or set them through environment variables before running JARVIS. Keep secrets out of version control and change `city` to your city.
 
 ### Step 5 — Enroll Your Face (Optional)
 
