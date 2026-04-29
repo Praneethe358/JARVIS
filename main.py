@@ -94,6 +94,10 @@ class JARVIS:
             # 5. Speak response
             self.voice.speak(response)
 
+            if any(w in command.lower() for w in ["exit", "shutdown jarvis", "goodbye"]):
+                log.info("Shutdown command received. Exiting main loop.")
+                break
+
             # 6. Log analytics
             self.router.analytics.log_interaction(command, response)
 
