@@ -174,12 +174,12 @@ class WakeWordDetector:
 
         while True:
             try:
-                log.debug("Initiating direct 3.5-second raw capture (bypassing silence logic)...")
+                log.debug("Initiating fast 2.2-second raw capture (optimized performance)...")
                 devnull, saved = _suppress_stderr()
                 try:
                     with self.mic as source:
-                        # RECORD is foolproof - it ignores energy levels entirely
-                        audio = self.recognizer.record(source, duration=3.5)
+                        # Faster turnaround window: 2.2s cuts input latency nearly in half
+                        audio = self.recognizer.record(source, duration=2.2)
                 finally:
                     _restore_stderr(devnull, saved)
                 

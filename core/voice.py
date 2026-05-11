@@ -57,7 +57,7 @@ class VoiceEngine:
         # Tailored setting: Your measured floor is ~6500. Setting 8500 base with dynamic drift ensures crisp responsiveness.
         self.recognizer.energy_threshold    = 8500
         self.recognizer.dynamic_energy_threshold = True
-        self.recognizer.pause_threshold     = 0.8   # seconds of silence = end
+        self.recognizer.pause_threshold     = 0.6   # Slightly faster cutoff for immediate transition
 
         self.mic: Optional[sr.Microphone] = None
         if self.backend == "typed":
