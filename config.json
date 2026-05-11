@@ -13,5 +13,5 @@
   "news_country": "in",
   "news_category": "technology",
   "mic_device_index": null,
-  "ollama_model": "llama3"
+  "ollama_model": "mistral"
 }

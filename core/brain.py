@@ -3,22 +3,25 @@ core/brain.py
 ─────────────
 Reasoning core for NEXUS.
 
-Primary path  : Ollama (http://localhost:11434) — mistral model
-Fallback path : Local keyword replies when Ollama is unreachable
+Primary path  : Ollama (http://127.0.0.1:11434/api/generate) — mistral model
+                Uses 127.0.0.1 explicitly; 'localhost' resolves to IPv6 on
+                this system but Ollama only binds to IPv4.
+Fallback path : Local keyword replies when Ollama is unreachable.
 
-Conversation history:  last 6 messages (3 exchanges) kept in-memory.
-System prompt:         injected into every Ollama call for consistent persona.
-Response sanitizer:    strips markdown before passing text to TTS engine.
+Conversation history : last 6 messages (3 exchanges) kept in-memory.
+System prompt        : injected into every Ollama call for consistent persona.
+Response sanitizer   : strips markdown before passing text to TTS engine.
 """
 
 import re
 import json
-import requests
+import urllib.request
+import urllib.error
 from collections import deque
 from core.logger import log
 
 # ── NEXUS system prompt ────────────────────────────────────────────────────────
-# Injected as the first message in every Ollama request to enforce persona.
+# Injected at the top of every Ollama prompt to enforce persona & TTS-safe style.
 _SYSTEM_PROMPT = (
     "You are NEXUS, a Linux-native AI automation framework and personal assistant. "
     "Respond concisely and conversationally — your replies will be spoken aloud via "
@@ -27,29 +30,25 @@ _SYSTEM_PROMPT = (
     "Be sharp, intelligent, and direct."
 )
 
-# ── Ollama API endpoint ────────────────────────────────────────────────────────
-_OLLAMA_ENDPOINT = "http://localhost:11434/api/chat"
+# ── Ollama endpoints ───────────────────────────────────────────────────────────
+# IMPORTANT: Use 127.0.0.1, NOT 'localhost'.
+# On this system, 'localhost' resolves to IPv6 (::1) but Ollama only binds
+# to IPv4 (127.0.0.1:11434), causing spurious "Not Found" / URLError failures.
+_OLLAMA_GENERATE = "http://127.0.0.1:11434/api/generate"
 
 
 def sanitize_for_tts(text: str) -> str:
     """
     Strip all markdown symbols before text reaches the TTS engine.
-    Removes: **, *, #, `, -, ~, > and excess whitespace.
+    Removes: **, *, #, `, -, ~, > and collapses whitespace.
     """
-    # Remove bold/italic markers
-    text = re.sub(r"\*+", "", text)
-    # Remove headings
-    text = re.sub(r"#+\s*", "", text)
-    # Remove inline code and code blocks
-    text = re.sub(r"`+", "", text)
-    # Remove leading bullet/dash/tilde characters on lines
-    text = re.sub(r"(?m)^[\-~>\s]*[\-~>]\s+", "", text)
-    # Collapse multiple blank lines into one
-    text = re.sub(r"\n{2,}", " ", text)
-    # Replace remaining newlines with a space
-    text = text.replace("\n", " ")
-    # Collapse duplicate spaces
-    text = re.sub(r" {2,}", " ", text)
+    text = re.sub(r"\*+", "", text)           # bold/italic
+    text = re.sub(r"#+\s*", "", text)         # headings
+    text = re.sub(r"`+", "", text)            # code
+    text = re.sub(r"(?m)^[\-~>\s]*[\-~>]\s+", "", text)  # bullet lines
+    text = re.sub(r"\n{2,}", " ", text)       # multiple blank lines
+    text = text.replace("\n", " ")            # remaining newlines
+    text = re.sub(r" {2,}", " ", text)        # duplicate spaces
     return text.strip()
 
 
@@ -71,10 +70,10 @@ class Brain:
     def think(self, user_input: str, context: str = "") -> str:
         """
         Main reasoning entry point called by the router.
-        If a skill provided context, inject it and skip Ollama.
+        If a skill provided context, return it directly.
         Otherwise, call Ollama with full conversation history.
         """
-        # If a skill already produced a concrete result, return it directly.
+        # Skill produced a concrete result — pass it through unchanged
         if context:
             self.history.append({"role": "user",      "content": user_input})
             self.history.append({"role": "assistant",  "content": context})
@@ -98,8 +97,8 @@ class Brain:
 
     def ask_ollama(self, prompt: str) -> str:
         """
-        Direct Ollama call — used by StudySkill and other skills that
-        want raw LLM responses bypassing the local keyword fallback.
+        Direct Ollama call — used by StudySkill and others that want a raw
+        LLM response without touching conversation history.
         Returns sanitized text, or empty string on failure.
         """
         if not self.ollama_available:
@@ -112,17 +111,16 @@ class Brain:
         Update the active Ollama model at runtime and persist to config.json.
         Called by the router when the user says 'switch model to [name]'.
         """
-        import json as _json
         self._model = model_name
         log.info(f"Ollama model switched to: {model_name}")
 
-        # Persist the new model name to config.json
+        # Persist the new model name to config.json so it survives restarts
         try:
             with open("config.json", "r") as f:
-                cfg = _json.load(f)
+                cfg = json.load(f)
             cfg["ollama_model"] = model_name
             with open("config.json", "w") as f:
-                _json.dump(cfg, f, indent=2)
+                json.dump(cfg, f, indent=2)
             log.info("ollama_model persisted to config.json")
         except Exception as e:
             log.warning(f"Could not persist model to config.json: {e}")
@@ -136,37 +134,50 @@ class Brain:
 
     def _ollama_query(self, user_input: str) -> str:
         """
-        POST to Ollama /api/chat.
-        Prepends the NEXUS system prompt and appends the full conversation
-        history so the model has context across turns.
-        Returns the assistant's reply string, or empty string on error.
+        POST to Ollama /api/generate using urllib.request (NOT requests lib).
+
+        Why urllib: the 'requests' library silently routes 127.0.0.1 traffic
+        through a system proxy on this machine, returning 404. urllib hits the
+        TCP socket directly, bypassing any proxy layer.
+
+        Conversation history + system prompt are serialised into a single
+        formatted prompt string so context carries across turns.
         """
-        # Build message list: system prompt + conversation history + new user message
-        messages = [{"role": "system", "content": _SYSTEM_PROMPT}]
-        messages.extend(list(self.history))           # last 6 messages
-        messages.append({"role": "user", "content": user_input})
+        # ── Build prompt: system + rolling history + current message ─────────
+        prompt_parts = [f"[SYSTEM] {_SYSTEM_PROMPT}\n"]
+        for msg in self.history:   # last 6 messages (3 exchanges)
+            role = "User" if msg["role"] == "user" else "NEXUS"
+            prompt_parts.append(f"{role}: {msg['content']}")
+        prompt_parts.append(f"User: {user_input}")
+        prompt_parts.append("NEXUS:")   # instruct the model to continue here
+        full_prompt = "\n".join(prompt_parts)
 
-        payload = {
-            "model": self._model,
-            "messages": messages,
-            "stream": False,                          # single response, not streaming
-        }
+        payload = json.dumps(
+            {"model": self._model, "prompt": full_prompt, "stream": False}
+        ).encode("utf-8")
 
+        # ── POST via urllib — direct socket, no proxy ────────────────────────
         try:
-            resp = requests.post(
-                _OLLAMA_ENDPOINT,
-                json=payload,
-                timeout=30,                           # allow up to 30s for inference
+            req = urllib.request.Request(
+                _OLLAMA_GENERATE,
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST",
             )
-            resp.raise_for_status()
-            data = resp.json()
-            return data.get("message", {}).get("content", "").strip()
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return data.get("response", "").strip()
 
-        except requests.exceptions.ConnectionError:
-            log.error("Ollama unreachable (ConnectionError).")
+        except urllib.error.HTTPError as e:
+            # Server responded with an HTTP error code (4xx/5xx)
+            log.error(f"Ollama HTTP error: {e.code} {e.reason}")
+            return ""
+        except urllib.error.URLError as e:
+            # Connection refused, DNS failure, etc.
+            log.error(f"Ollama connection error: {e.reason}")
             self.ollama_available = False
             return ""
-        except requests.exceptions.Timeout:
+        except TimeoutError:
             log.error("Ollama request timed out.")
             return ""
         except Exception as e:
@@ -198,5 +209,4 @@ class Brain:
         if any(p in text for p in ["good night", "bye", "goodbye"]):
             return "Goodbye, Sir."
 
-        # Final fallback — let the user know Ollama is down
         return "My reasoning core is offline. Running on base systems only."
