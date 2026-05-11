@@ -211,6 +211,67 @@ class NEXUS:
             # 6. Log analytics
             self.router.analytics.log_interaction(command, response)
 
+            # ── Follow-up loop ─────────────────────────────────────────────────
+            # After answering, NEXUS stays active and listens for follow-up
+            # commands directly — no wake word needed. Exits the follow-up
+            # window when the user is silent, says "that's all / done / thanks",
+            # or after MAX_FOLLOWUPS consecutive commands.
+            MAX_FOLLOWUPS = 5   # max follow-up turns before returning to wake word
+            followup_count = 0
+
+            while followup_count < MAX_FOLLOWUPS:
+                ui.status("Following up — speak now or stay silent to exit", "wait")
+                followup = self.voice.listen()   # short listen, no "Yes?" prompt
+
+                # No speech detected → return to wake word mode
+                if not followup:
+                    log.info("No follow-up detected — returning to wake word mode.")
+                    ui.status("NEXUS ACTIVE — listening for wake word", "ok")
+                    break
+
+                followup_lower = followup.lower().strip()
+                log.debug(f"Follow-up command: {followup}")
+
+                # User explicitly ends the conversation
+                if any(p in followup_lower for p in [
+                    "that's all", "thats all", "thank you", "thanks",
+                    "done", "stop", "go back", "never mind"
+                ]):
+                    self.voice.speak("Alright, listening for your next call.")
+                    ui.status("NEXUS ACTIVE — listening for wake word", "ok")
+                    break
+
+                # Shutdown inside follow-up loop
+                if any(w in followup_lower for w in ["exit", "shutdown nexus", "goodbye"]):
+                    with ui.spinner("Thinking"):
+                        followup_response = self.router.handle(followup)
+                    self.voice.speak(followup_response)
+                    log.info("Shutdown command received. Exiting.")
+                    ui.shutdown_banner(CONFIG.get("user_name", "Praneeth"))
+                    return   # exit run() entirely
+
+                # Route the follow-up command (same pipeline, no wake word)
+                followup_response = ""
+                with ui.spinner("Thinking"):
+                    followup_response = self.router.handle(followup)
+
+                # Handle sleep inside follow-up
+                if followup_response == "__SLEEP__":
+                    self.voice.speak("Going to sleep. Say 'nexus wake up' to resume.")
+                    ui.status("NEXUS SLEEPING — say 'nexus wake up' to resume", "wait")
+                    while True:
+                        self.wake.listen()
+                        wake_cmd = self.voice.listen()
+                        if wake_cmd and any(p in wake_cmd.lower() for p in ["wake up", "nexus wake"]):
+                            self.voice.speak("I'm awake. Ready for your command, Sir.")
+                            ui.status("NEXUS ACTIVE", "ok")
+                            break
+                    break   # exit follow-up loop after waking
+
+                self.voice.speak(followup_response)
+                self.router.analytics.log_interaction(followup, followup_response)
+                followup_count += 1
+
 
 
 if __name__ == "__main__":
