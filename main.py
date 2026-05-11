@@ -153,6 +153,22 @@ class NEXUS:
                 response = self.router.handle(command)
 
             # 5. Speak response
+            if response == "__SLEEP__":
+                # ── Sleep mode ────────────────────────────────
+                self.voice.speak("Going to sleep. Say 'nexus wake up' to resume.")
+                ui.status("NEXUS SLEEPING — say 'nexus wake up' to resume", "wait")
+                log.info("NEXUS entering sleep mode.")
+
+                while True:
+                    self.wake.listen()
+                    wake_cmd = self.voice.listen()
+                    if wake_cmd and any(p in wake_cmd.lower() for p in ["wake up", "nexus wake"]):
+                        self.voice.speak("I'm awake. Ready for your command, Sir.")
+                        ui.status("NEXUS ACTIVE", "ok")
+                        log.info("NEXUS woken from sleep mode.")
+                        break
+                continue   # resume main loop without logging the sleep interaction
+
             self.voice.speak(response)
 
             if any(w in command.lower() for w in ["exit", "shutdown nexus", "goodbye"]):
@@ -162,6 +178,7 @@ class NEXUS:
 
             # 6. Log analytics
             self.router.analytics.log_interaction(command, response)
+
 
 
 if __name__ == "__main__":

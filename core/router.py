@@ -55,6 +55,10 @@ class CommandRouter:
             self.brain.clear_memory()
             return "Conversation memory cleared, Sir."
 
+        # ── Sleep command ──────────────────────────────────
+        if any(phrase in command_lower for phrase in ["nexus sleep", "go to sleep", "sleep mode"]):
+            return "__SLEEP__"
+
         if command_lower in ["time", "what time", "what's the time", "current time"] or any(phrase in command_lower for phrase in ["what is the time", "what's the time", "tell me the time", "current time", "time now", "what time is it", "what time it is"]):
             return f"The current time is {datetime.now().strftime('%I:%M %p')}."
 
