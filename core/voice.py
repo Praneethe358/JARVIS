@@ -15,6 +15,7 @@ INSTALL:
 import speech_recognition as sr
 import pyttsx3
 import threading
+from typing import Optional
 from core.logger import log
 from core.config import CONFIG
 
@@ -40,12 +41,16 @@ class VoiceEngine:
         self.recognizer.dynamic_energy_threshold = True
         self.recognizer.pause_threshold     = 0.8   # seconds of silence = end
 
-        self.mic = sr.Microphone()
+        self.mic: Optional[sr.Microphone] = None
+        try:
+            self.mic = sr.Microphone()
 
-        # Adjust for ambient noise once at startup
-        with self.mic as source:
-            log.info("Calibrating microphone for ambient noise...")
-            self.recognizer.adjust_for_ambient_noise(source, duration=1)
+            # Adjust for ambient noise once at startup
+            with self.mic as source:
+                log.info("Calibrating microphone for ambient noise...")
+                self.recognizer.adjust_for_ambient_noise(source, duration=1)
+        except Exception as e:
+            log.warning(f"Microphone unavailable. Falling back to typed input mode: {e}")
 
         log.info("VoiceEngine initialised.")
 
@@ -96,6 +101,10 @@ class VoiceEngine:
             str  — transcribed command (lowercase)
             None — if recognition fails
         """
+        if self.mic is None:
+            typed = input("⌨️  Type command: ").strip()
+            return typed.lower() if typed else None
+
         print("🎙  Listening...")
         try:
             with self.mic as source:

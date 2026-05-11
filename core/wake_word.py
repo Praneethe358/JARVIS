@@ -27,14 +27,13 @@ class WakeWordDetector:
         self.keyword   = keyword.lower()
         self.backend   = CONFIG.get("wake_backend", "sr")  # "porcupine" or "sr"
         self._porcupine = None
+        self.recognizer = None
+        self.mic = None
 
         if self.backend == "porcupine":
             self._init_porcupine()
         else:
-            self.recognizer = sr.Recognizer()
-            self.recognizer.energy_threshold = 250
-            self.recognizer.dynamic_energy_threshold = True
-            self.mic = sr.Microphone()
+            self._init_sr_backend()
 
         log.info(f"WakeWordDetector ready — keyword: '{self.keyword}', backend: {self.backend}")
 
@@ -60,10 +59,21 @@ class WakeWordDetector:
         except ImportError:
             log.warning("pvporcupine not installed. Falling back to SpeechRecognition.")
             self.backend = "sr"
-            self.recognizer = sr.Recognizer()
-            self.mic = sr.Microphone()
+            self._init_sr_backend()
         except Exception as e:
             log.error(f"Porcupine init failed: {e}. Falling back.")
+            self.backend = "sr"
+            self._init_sr_backend()
+
+    def _init_sr_backend(self):
+        self.recognizer = sr.Recognizer()
+        self.recognizer.energy_threshold = 250
+        self.recognizer.dynamic_energy_threshold = True
+        try:
+            self.mic = sr.Microphone()
+        except Exception as e:
+            self.mic = None
+            log.warning(f"Wake word microphone unavailable. Using typed wake word mode: {e}")
             self.backend = "sr"
 
     def _listen_porcupine(self):
@@ -99,6 +109,13 @@ class WakeWordDetector:
         the keyword using Google STT. Works without any API key
         for short phrases.
         """
+        if self.mic is None:
+            while True:
+                typed = input("⌨️  Type wake word: ").strip().lower()
+                if self.keyword in typed:
+                    log.info(f"Wake word '{self.keyword}' detected from typed input.")
+                    return
+            
         with self.mic as source:
             self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
 
