@@ -10,6 +10,7 @@ Router finds the best match; if none found, Brain handles it.
 """
 
 import re
+from datetime import datetime
 from core.logger import log
 
 
@@ -53,6 +54,12 @@ class CommandRouter:
         if "clear memory" in command_lower or "forget everything" in command_lower:
             self.brain.clear_memory()
             return "Conversation memory cleared, Sir."
+
+        if any(phrase in command_lower for phrase in ["what is the time", "what's the time", "tell me the time", "current time", "time now", "what time is it", "what time it is"]):
+            return f"The current time is {datetime.now().strftime('%I:%M %p')}."
+
+        if any(phrase in command_lower for phrase in ["what is the date", "what's the date", "today's date", "today date", "current date", "date now", "what day is it", "what day today"]):
+            return f"Today's date is {datetime.now().strftime('%A, %d %B %Y')}."
 
         # ── 2. Skill matching ──────────────────────────────
         matched_skill = self._match_skill(command_lower)

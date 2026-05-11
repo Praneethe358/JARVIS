@@ -196,6 +196,10 @@ class MusicSkill:
             return None
 
     def handle(self, command: str) -> str:
+        if "open spotify" in command or ("spotify" in command and any(w in command for w in ["open", "launch", "start"])):
+            webbrowser.open("https://open.spotify.com/")
+            return "[Music] Opening Spotify in your browser."
+
         sp = self._get_sp()
         if not sp:
             return "[Music] Spotify not configured. Add credentials to config.json."
@@ -300,6 +304,8 @@ class SearchSkill:
 import os as _os
 import subprocess
 import platform
+import shutil
+import webbrowser
 
 
 class SystemSkill:
@@ -380,20 +386,71 @@ class SystemSkill:
 
     def _open_app(self, command: str) -> str:
         import re
-        app = re.sub(r'\b(open|launch|start)\b', '', command).strip()
-        if not app:
+        target = re.sub(r'\b(open|launch|start)\b', '', command).strip()
+        if not target:
             return "[System] No application specified."
         try:
             system = platform.system().lower()
+            target_lower = re.sub(r'\s+', ' ', target.lower()).strip()
+
+            url_map = {
+                "chatgpt": "https://chatgpt.com/",
+                "chat gpt": "https://chatgpt.com/",
+                "github": "https://github.com/",
+                "git hub": "https://github.com/",
+                "github.com": "https://github.com/",
+                "spotify": "https://open.spotify.com/",
+                "browser": "https://www.google.com/",
+                "chrome browser": "https://www.google.com/",
+            }
+
+            app_map = {
+                "chrome": ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"],
+                "google chrome": ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"],
+                "browser": ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"],
+            }
+
+            if target_lower in url_map:
+                webbrowser.open(url_map[target_lower])
+                return f"[System] Opening {target.title()} in your browser."
+
+            if target_lower in ["spotify", "open spotify"]:
+                webbrowser.open("https://open.spotify.com/")
+                return "[System] Opening Spotify in your browser."
+
             if system == "windows":
-                _os.startfile(app)
+                if target_lower in url_map:
+                    webbrowser.open(url_map[target_lower])
+                elif target_lower in app_map:
+                    for app_name in app_map[target_lower]:
+                        if shutil.which(app_name):
+                            subprocess.Popen([app_name])
+                            break
+                    else:
+                        webbrowser.open(f"https://www.google.com/search?q={target.replace(' ', '+')}")
+                else:
+                    _os.startfile(target)
             elif system == "linux":
-                subprocess.Popen([app])
+                if target_lower in app_map:
+                    for app_name in app_map[target_lower]:
+                        if shutil.which(app_name):
+                            subprocess.Popen([app_name])
+                            break
+                    else:
+                        webbrowser.open(f"https://www.google.com/search?q={target.replace(' ', '+')}")
+                else:
+                    try:
+                        subprocess.Popen([target])
+                    except FileNotFoundError:
+                        webbrowser.open(f"https://www.google.com/search?q={target.replace(' ', '+')}")
             elif system == "darwin":
-                subprocess.Popen(["open", "-a", app])
-            return f"[System] Opening {app}."
+                if target_lower in url_map:
+                    webbrowser.open(url_map[target_lower])
+                else:
+                    subprocess.Popen(["open", "-a", target])
+            return f"[System] Opening {target}."
         except Exception as e:
-            return f"[System] Could not open '{app}': {e}"
+            return f"[System] Could not open '{target}': {e}"
 
     def _shutdown(self, system: str) -> str:
         import time
