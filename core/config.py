@@ -15,7 +15,6 @@ except Exception:
     pass
 
 _DEFAULT_CONFIG = {
-    "openai_api_key"       : os.getenv("OPENAI_API_KEY", ""),
     "openweather_api_key"  : os.getenv("OPENWEATHER_API_KEY", ""),
     "newsapi_key"          : os.getenv("NEWSAPI_KEY", ""),
     "spotify_client_id"    : os.getenv("SPOTIFY_CLIENT_ID", ""),
@@ -32,7 +31,6 @@ _DEFAULT_CONFIG = {
 }
 
 _ENV_OVERRIDES = {
-    "openai_api_key": "OPENAI_API_KEY",
     "openweather_api_key": "OPENWEATHER_API_KEY",
     "newsapi_key": "NEWSAPI_KEY",
     "spotify_client_id": "SPOTIFY_CLIENT_ID",

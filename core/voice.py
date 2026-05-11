@@ -3,12 +3,12 @@ core/voice.py
 ─────────────
 Voice Engine — handles both Speech-to-Text (STT) and Text-to-Speech (TTS).
 
-STT  : Google Speech Recognition (online)  OR  OpenAI Whisper (offline)
+STT  : Google Speech Recognition (online)  OR  Whisper offline model
 TTS  : pyttsx3 (offline, zero latency)     OR  ElevenLabs (premium, natural)
 
 INSTALL:
     pip install SpeechRecognition pyttsx3 pyaudio
-    pip install openai-whisper              # optional: offline STT
+    pip install whisper-offline             # optional: offline STT
     pip install elevenlabs                  # optional: premium TTS
 """
 
@@ -176,7 +176,7 @@ class VoiceEngine:
 
     def _whisper_recognise(self, audio) -> str | None:
         """
-        Offline STT using OpenAI Whisper (runs locally).
+        Offline STT using a local Whisper model (runs locally).
         Better accuracy, works without internet.
         """
         try:

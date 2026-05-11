@@ -1,151 +1,131 @@
 """
 core/brain.py
 ─────────────
-AI Brain — powered by the OpenAI API.
+Local-only conversational brain for JARVIS.
 
-Handles:
-  • General conversation
-  • Study buddy Q&A
-  • Multi-turn memory (rolling context window)
-  • Personality: JARVIS-like — concise, intelligent, respectful
-
-INSTALL:
-    pip install openai
+This version does not use any external model APIs. It provides:
+- friendly local replies
+- basic study explanations
+- simple memory reset support
 """
 
-from openai import OpenAI, AuthenticationError, RateLimitError
 from collections import deque
-from core.config import CONFIG
 from core.logger import log
 
 
-SYSTEM_PROMPT = """
-You are JARVIS (Just A Rather Very Intelligent System), a personal AI assistant
-for Praneeth — a 2nd-year AI & Data Science student at Karunya Institute of
-Technology, India.
-
-Personality:
-- Concise, intelligent, slightly formal — like the JARVIS from Iron Man.
-- Address the user as "Sir" occasionally, as Praneeth prefers.
-- Keep spoken responses SHORT (2–3 sentences max) unless asked to explain in detail.
-- For study topics (AI, ML, CV, Data Science), give clear, accurate technical answers.
-- You are running on the user's laptop as a local Python application.
-
-Current capabilities (handled by skill modules — do NOT fabricate results):
-  weather, news, calendar, music, web search, system control, notes, analytics.
-
-When a skill is handling the request, you will receive the skill's output and
-should relay it naturally. When no skill matches, answer conversationally.
-"""
+_STUDY_BANK = {
+    "gradient descent": (
+        "Gradient descent is an optimisation method that moves parameters in the direction "
+        "that reduces error the fastest. Think of it like walking downhill by feeling the slope under your feet."
+    ),
+    "overfitting": (
+        "Overfitting happens when a model memorises training data instead of learning the general pattern. "
+        "It scores high on training data but struggles on new data."
+    ),
+    "underfitting": (
+        "Underfitting means the model is too simple to capture the underlying pattern in the data. "
+        "It performs poorly on both training and test data."
+    ),
+    "backpropagation": (
+        "Backpropagation is the method neural networks use to distribute error backward through the layers. "
+        "That error is used to update weights and improve predictions."
+    ),
+    "classification": (
+        "Classification is a supervised learning task where the model predicts a category label, such as spam or not spam."
+    ),
+    "regression": (
+        "Regression is a supervised learning task where the model predicts a numeric value, such as house price."
+    ),
+    "normalization": (
+        "Normalization rescales values into a common range so features with larger magnitudes do not dominate learning."
+    ),
+    "bias variance": (
+        "Bias is error from overly simple assumptions. Variance is error from being too sensitive to training data. "
+        "Good models balance both."
+    ),
+}
 
 
 class Brain:
-    """
-    Conversational AI core using OpenAI chat models.
-
-    Usage:
-        brain = Brain()
-        response = brain.think("Explain gradient descent")
-    """
+    """Conversational local brain for JARVIS."""
 
     def __init__(self):
-        api_key = CONFIG.get("openai_api_key")
-        self.client = None
-        self.model = "gpt-4o-mini"
-        self.history = deque(maxlen=20)  # rolling window: last 20 turns
-
-        if api_key:
-            self.client = OpenAI(api_key=api_key)
-            log.info(f"Brain (OpenAI {self.model}) initialised.")
-        else:
-            log.warning("OPENAI_API_KEY not set. Brain running in local fallback mode.")
+        self.history = deque(maxlen=20)
+        log.info("Local Brain initialised.")
 
     def _local_reply(self, user_input: str, context: str = "") -> str:
+        text = user_input.lower().strip()
+
         if context:
             return context
+
+        if any(phrase in text for phrase in ["how are you", "how r you", "how r u"]):
+            return "I am running locally and ready, Sir."
+
+        if any(phrase in text for phrase in ["what can you do", "help", "features", "what are your features"]):
+            return (
+                "I can open apps, handle notes and reminders, manage your schedule, show the time and date, "
+                "do local study explanations, check weather or news if keys are configured, and help with system tasks."
+            )
+
+        if any(phrase in text for phrase in ["who are you", "what are you"]):
+            return "I am JARVIS, your local assistant."
+
+        if any(phrase in text for phrase in ["thank you", "thanks"]):
+            return "You are welcome, Sir."
+
+        if any(phrase in text for phrase in ["good night", "bye", "goodbye"]):
+            return "Goodbye, Sir."
+
         return (
-            "OpenAI is not configured yet, Sir. "
-            "I can still run local skills, but conversational replies need an API key."
+            "I can help with local tasks, notes, reminders, schedule management, app launching, "
+            "and study explanations. Try asking for help, your schedule, or a specific app to open."
         )
 
-    # ──────────────────────────────────────────────────────
     def think(self, user_input: str, context: str = "") -> str:
-        """
-        Send a message to OpenAI and return the text response.
-
-        Args:
-            user_input : what the user said
-            context    : optional extra context injected by a skill
-                         (e.g. weather data, search results)
-
-        Returns:
-            str: JARVIS's spoken response
-        """
-        if self.client is None:
-            return self._local_reply(user_input, context)
-
         content = user_input
         if context:
-            content = f"{user_input}\n\n[Skill context for your response]:\n{context}"
+            content = f"{user_input}\n\n[Skill context]:\n{context}"
 
         self.history.append({"role": "user", "content": content})
+        reply = self._local_reply(user_input, context)
+        self.history.append({"role": "assistant", "content": reply})
+        return reply
 
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                max_tokens=300,          # short spoken answers
-                messages=[{"role": "system", "content": SYSTEM_PROMPT}, *list(self.history)]
-            )
-            reply = (response.choices[0].message.content or "").strip()
-            if not reply:
-                reply = "I could not generate a response right now."
-            self.history.append({"role": "assistant", "content": reply})
-            return reply
-
-        except AuthenticationError:
-            return "I'm unable to connect — please check your API key, Sir."
-        except RateLimitError:
-            return "I'm being rate-limited. Please wait a moment."
-        except Exception as e:
-            log.error(f"Brain.think() error: {e}")
-            return "I encountered an error processing that request."
-
-    # ──────────────────────────────────────────────────────
     def study(self, topic: str, depth: str = "explain") -> str:
-        """
-        Study buddy mode — longer, detailed responses for learning.
+        topic_clean = topic.lower().strip()
+        matched = None
+        for key in _STUDY_BANK:
+            if key in topic_clean:
+                matched = key
+                break
 
-        Args:
-            topic : concept to explain (e.g. "backpropagation")
-            depth : "explain" | "quiz" | "summarise"
-        """
-        if self.client is None:
-            return self._local_reply(topic)
-
-        prompts = {
-            "explain"  : f"Explain '{topic}' clearly with an analogy and a simple example. Target audience: 2nd-year AI student.",
-            "quiz"     : f"Give me 3 short quiz questions on '{topic}' with answers. Format: Q: ... A: ...",
-            "summarise": f"Give a bullet-point summary of the key concepts in '{topic}' for quick revision.",
-        }
-        prompt = prompts.get(depth, prompts["explain"])
-
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                max_tokens=600,          # longer for study mode
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": prompt}
-                ]
+        if depth == "quiz":
+            return (
+                f"Quiz on {topic}:\n"
+                f"1. What is {topic}?\n"
+                f"2. Why is {topic} important?\n"
+                f"3. Give one real-world use of {topic}."
             )
-            return (response.choices[0].message.content or "").strip()
 
-        except Exception as e:
-            log.error(f"Brain.study() error: {e}")
-            return "I couldn't fetch that topic right now."
+        if depth == "summarise":
+            if matched:
+                return f"Summary of {topic}:\n- {_STUDY_BANK[matched]}"
+            return (
+                f"Summary of {topic}:\n"
+                f"- It is a core concept to study.\n"
+                f"- Focus on the definition, example, and why it matters.\n"
+                f"- Practice one small real-world example."
+            )
 
-    # ──────────────────────────────────────────────────────
+        if matched:
+            return _STUDY_BANK[matched]
+
+        return (
+            f"{topic} is a useful topic to study. Start with the definition, then a simple example, then a small use case. "
+            f"If you want, I can turn it into a short quiz or summary."
+        )
+
     def clear_memory(self):
-        """Reset conversation history."""
         self.history.clear()
         log.info("Conversation memory cleared.")

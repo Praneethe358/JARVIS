@@ -22,6 +22,7 @@ from skills.music    import MusicSkill
 from skills.search   import SearchSkill
 from skills.system   import SystemSkill
 from skills.notes    import NotesSkill
+from skills.personal import PersonalAssistantSkill
 from skills.analytics import AnalyticsSkill
 from skills.study    import StudySkill
 from core.router     import CommandRouter
@@ -58,10 +59,12 @@ class JARVIS:
             SearchSkill(),
             SystemSkill(),
             NotesSkill(),
+            PersonalAssistantSkill(),
             AnalyticsSkill(),
             StudySkill(),
         ]
         self.router = CommandRouter(skills, self.brain)
+        self.personal = next((s for s in skills if s.__class__.__name__ == "PersonalAssistantSkill"), None)
 
         log.info("All systems online. JARVIS ready.")
 
@@ -70,6 +73,10 @@ class JARVIS:
         self.voice.speak("JARVIS online. Awaiting your command, Praneeth.")
 
         while True:
+            if self.personal:
+                for reminder in self.personal.check_due_reminders():
+                    self.voice.speak(reminder)
+
             # 1. Block until wake word heard
             log.info("Listening for wake word...")
             self.wake.listen()

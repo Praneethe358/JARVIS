@@ -1,168 +1,59 @@
-12:30:26 [INFO] Initialising JARVIS subsystems...
-12:30:27 [INFO] Calibrating microphone for ambient noise...
-12:30:28 [INFO] VoiceEngine initialised.
-12:31:22 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:31:32 [INFO] Initialising JARVIS subsystems...
-12:31:32 [INFO] Calibrating microphone for ambient noise...
-12:31:33 [INFO] VoiceEngine initialised.
-12:31:33 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:31:33 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: sr
-12:31:33 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
-12:31:33 [INFO] Router loaded with 9 skills.
-12:31:33 [INFO] All systems online. JARVIS ready.
-12:31:33 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
-12:31:33 [INFO] Listening for wake word...
-12:37:38 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
-12:37:51 [INFO] Initialising JARVIS subsystems...
-12:37:51 [INFO] Calibrating microphone for ambient noise...
-12:37:52 [INFO] VoiceEngine initialised.
-12:37:52 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:37:52 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
-12:37:52 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
-12:37:52 [INFO] Router loaded with 9 skills.
-12:37:52 [INFO] All systems online. JARVIS ready.
-12:37:52 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
-12:37:52 [INFO] Listening for wake word...
-12:38:07 [INFO] Wake word 'jarvis' detected from typed input.
-12:38:07 [INFO] [JARVIS] → Yes?
-12:39:11 [INFO] STT backend set to typed input mode.
-12:39:11 [INFO] VoiceEngine initialised.
-12:39:25 [INFO] Initialising JARVIS subsystems...
-12:39:25 [INFO] STT backend set to typed input mode.
-12:39:25 [INFO] VoiceEngine initialised.
-12:39:25 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:39:25 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
-12:39:25 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
-12:39:25 [INFO] Router loaded with 9 skills.
-12:39:25 [INFO] All systems online. JARVIS ready.
-12:39:25 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
-12:39:25 [INFO] Listening for wake word...
-12:39:36 [INFO] Wake word 'jarvis' detected from typed input.
-12:39:36 [INFO] [JARVIS] → Yes?
-12:39:48 [INFO] Command received: what is the time now?
-12:39:48 [INFO] Routing to skill: SearchSkill
-12:39:55 [INFO] [SearchSkill] query='the time now?'
-12:39:55 [INFO] [JARVIS] → [Search] No quick answer found. Opened browser for 'the time now?'.
-12:39:59 [INFO] Listening for wake word...
-12:40:44 [INFO] Wake word 'jarvis' detected from typed input.
-12:40:44 [INFO] [JARVIS] → Yes?
-12:40:50 [INFO] Command received: what is the date
-12:40:50 [INFO] Routing to skill: SearchSkill
-12:40:56 [INFO] [SearchSkill] query='the date'
-12:40:56 [INFO] [JARVIS] → [Search] No quick answer found. Opened browser for 'the date'.
-12:41:00 [INFO] Listening for wake word...
-12:41:03 [INFO] Wake word 'jarvis' detected from typed input.
-12:41:03 [INFO] [JARVIS] → Yes?
-12:41:10 [INFO] Command received: open spotify
-12:41:10 [INFO] Routing to skill: MusicSkill
-12:41:10 [INFO] [JARVIS] → [Music] Command not understood.
-12:41:12 [INFO] Listening for wake word...
-12:41:21 [INFO] Wake word 'jarvis' detected from typed input.
-12:41:21 [INFO] [JARVIS] → Yes?
-12:41:28 [INFO] Command received: tell me news
-12:41:28 [INFO] Routing to skill: NewsSkill
-12:41:45 [INFO] [JARVIS] → [News] Error: Your API key is invalid or incorrect. Check your key, or go to https://newsapi.org to create a free API key.
-12:41:55 [INFO] Listening for wake word...
-12:43:42 [INFO] Selected TTS voice: gmw/en
-12:43:42 [INFO] STT backend set to typed input mode.
-12:43:42 [INFO] VoiceEngine initialised.
-12:44:05 [INFO] Selected TTS voice: gmw/en-us+f3
-12:44:05 [INFO] STT backend set to typed input mode.
-12:44:05 [INFO] VoiceEngine initialised.
-12:44:18 [INFO] Initialising JARVIS subsystems...
-12:44:18 [INFO] Selected TTS voice: gmw/en-us+f3
-12:44:18 [INFO] STT backend set to typed input mode.
-12:44:18 [INFO] VoiceEngine initialised.
-12:44:18 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:44:18 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
-12:44:18 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
-12:44:18 [INFO] Router loaded with 9 skills.
-12:44:18 [INFO] All systems online. JARVIS ready.
-12:44:18 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
-12:44:18 [INFO] Listening for wake word...
-12:44:30 [INFO] Wake word 'jarvis' detected from typed input.
-12:44:30 [INFO] [JARVIS] → Yes?
-12:44:44 [INFO] Command received: what is the date and time
-12:44:44 [INFO] Routing to skill: SearchSkill
-12:44:51 [INFO] [SearchSkill] query='the date and time'
-12:44:51 [INFO] [JARVIS] → [Search] No quick answer found. Opened browser for 'the date and time'.
-12:44:56 [INFO] Listening for wake word...
-12:46:52 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:46:52 [INFO] Router loaded with 9 skills.
-12:46:52 [INFO] Routing to skill: SystemSkill
-12:46:52 [INFO] Routing to skill: SystemSkill
-12:46:52 [INFO] Routing to skill: SystemSkill
-12:46:52 [INFO] Routing to skill: MusicSkill
-12:47:51 [INFO] Initialising JARVIS subsystems...
-12:47:51 [INFO] Selected TTS voice: gmw/en-us+f3
-12:47:51 [INFO] STT backend set to typed input mode.
-12:47:51 [INFO] VoiceEngine initialised.
-12:47:51 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:47:51 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
-12:47:51 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
-12:47:51 [INFO] Router loaded with 9 skills.
-12:47:51 [INFO] All systems online. JARVIS ready.
-12:47:51 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
-12:47:51 [INFO] Listening for wake word...
-12:48:04 [INFO] Wake word 'jarvis' detected from typed input.
-12:48:04 [INFO] [JARVIS] → Yes?
-12:48:09 [INFO] Command received: time
-12:48:09 [INFO] No skill matched — routing to Brain.
-12:48:09 [INFO] [JARVIS] → OpenAI is not configured yet, Sir. I can still run local skills, but conversational replies need an API key.
-12:48:17 [INFO] Listening for wake word...
-12:52:31 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:52:31 [INFO] Router loaded with 9 skills.
-12:52:31 [INFO] Routing to skill: SystemSkill
-12:52:31 [INFO] Routing to skill: SystemSkill
-12:52:31 [INFO] Routing to skill: SystemSkill
-12:52:32 [INFO] Routing to skill: MusicSkill
-12:52:41 [INFO] Initialising JARVIS subsystems...
-12:52:41 [INFO] Selected TTS voice: gmw/en-us+f3
-12:52:41 [INFO] STT backend set to typed input mode.
-12:52:41 [INFO] VoiceEngine initialised.
-12:52:41 [WARNING] OPENAI_API_KEY not set. Brain running in local fallback mode.
-12:52:41 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
-12:52:41 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
-12:52:41 [INFO] Router loaded with 9 skills.
-12:52:41 [INFO] All systems online. JARVIS ready.
-12:52:41 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
-12:52:41 [INFO] Listening for wake word...
-12:53:07 [INFO] Wake word 'jarvis' detected from typed input.
-12:53:07 [INFO] [JARVIS] → Yes?
-12:53:12 [INFO] Command received: date
-12:53:12 [INFO] No skill matched — routing to Brain.
-12:53:12 [INFO] [JARVIS] → OpenAI is not configured yet, Sir. I can still run local skills, but conversational replies need an API key.
-12:53:20 [INFO] Listening for wake word...
-12:53:56 [INFO] Wake word 'jarvis' detected from typed input.
-12:53:56 [INFO] [JARVIS] → Yes?
-12:54:00 [INFO] Command received: what is the date
-12:54:00 [INFO] [JARVIS] → Today's date is Monday, 11 May 2026.
-12:54:04 [INFO] Listening for wake word...
-12:54:12 [INFO] Wake word 'jarvis' detected from typed input.
-12:54:12 [INFO] [JARVIS] → Yes?
-12:54:18 [INFO] Command received: time now
-12:54:18 [INFO] [JARVIS] → The current time is 12:54 PM.
-12:54:21 [INFO] Listening for wake word...
-12:54:30 [INFO] Wake word 'jarvis' detected from typed input.
-12:54:30 [INFO] [JARVIS] → Yes?
-12:54:37 [INFO] Command received: opeopen spotify
-12:54:37 [INFO] Routing to skill: MusicSkill
-12:54:38 [INFO] [JARVIS] → [Music] Opening Spotify in your browser.
-12:54:41 [INFO] Listening for wake word...
-12:57:03 [INFO] Initialising JARVIS subsystems...
-12:57:03 [INFO] Selected TTS voice: gmw/en-us+f3
-12:57:03 [INFO] Calibrating microphone for ambient noise...
-12:57:04 [INFO] VoiceEngine initialised.
-12:57:05 [INFO] Brain (OpenAI gpt-4o-mini) initialised.
-12:57:05 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: sr
-12:57:05 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
-12:57:05 [INFO] Router loaded with 9 skills.
-12:57:05 [INFO] All systems online. JARVIS ready.
-12:57:05 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
-12:57:05 [INFO] Listening for wake word...
-12:58:29 [INFO] Wake word 'jarvis' detected from typed input.
-12:58:29 [INFO] [JARVIS] → Yes?
-12:58:39 [INFO] Command received: howare you
-12:58:39 [INFO] No skill matched — routing to Brain.
-12:58:39 [INFO] [JARVIS] → OpenAI is not configured yet, Sir. I can still run local skills, but conversational replies need an API key.
-12:58:47 [INFO] Listening for wake word...
+13:11:42 [INFO] Initialising JARVIS subsystems...
+13:11:42 [INFO] Selected TTS voice: gmw/en-us+f3
+13:11:42 [INFO] STT backend set to typed input mode.
+13:11:42 [INFO] VoiceEngine initialised.
+13:11:42 [INFO] Local Brain initialised.
+13:11:42 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
+13:11:42 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+13:11:42 [INFO] Router loaded with 10 skills.
+13:11:42 [INFO] All systems online. JARVIS ready.
+13:11:42 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+13:11:42 [INFO] Listening for wake word...
+13:11:50 [INFO] Wake word 'jarvis' detected from typed input.
+13:11:50 [INFO] [JARVIS] → Yes?
+13:12:14 [INFO] Command received: add reminder "study at 2"
+13:12:14 [INFO] Routing to skill: PersonalAssistantSkill
+13:12:14 [INFO] [PersonalAssistantSkill] Saved reminder #1
+13:12:14 [INFO] [JARVIS] → [Reminders] Reminder saved for no specific time: add reminder "study 2"
+13:12:20 [INFO] Listening for wake word...
+13:14:31 [INFO] [PersonalAssistantSkill] Saved reminder #2
+13:14:31 [INFO] [PersonalAssistantSkill] Saved reminder #3
+13:14:31 [INFO] [PersonalAssistantSkill] Saved reminder #4
+13:15:09 [INFO] [PersonalAssistantSkill] Saved reminder #5
+13:15:09 [INFO] [PersonalAssistantSkill] Saved reminder #6
+13:16:46 [INFO] [PersonalAssistantSkill] Saved reminder #7
+13:16:46 [INFO] [PersonalAssistantSkill] Saved reminder #8
+13:17:54 [INFO] [PersonalAssistantSkill] Saved reminder #9
+13:17:54 [INFO] [PersonalAssistantSkill] Saved reminder #10
+13:18:42 [INFO] Wake word 'jarvis' detected from typed input.
+13:18:42 [INFO] [JARVIS] → Yes?
+13:19:23 [INFO] [PersonalAssistantSkill] Saved reminder #11
+13:19:23 [INFO] [PersonalAssistantSkill] Saved reminder #12
+13:19:23 [INFO] [PersonalAssistantSkill] Saved reminder #13
+13:21:23 [INFO] [PersonalAssistantSkill] Saved reminder #14
+13:21:23 [INFO] [PersonalAssistantSkill] Saved reminder #15
+13:21:23 [INFO] [PersonalAssistantSkill] Saved reminder #16
+13:22:13 [INFO] Initialising JARVIS subsystems...
+13:22:13 [INFO] Selected TTS voice: gmw/en-us+f3
+13:22:13 [INFO] STT backend set to typed input mode.
+13:22:13 [INFO] VoiceEngine initialised.
+13:22:13 [INFO] Local Brain initialised.
+13:22:13 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
+13:22:13 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+13:22:13 [INFO] Router loaded with 10 skills.
+13:22:13 [INFO] All systems online. JARVIS ready.
+13:22:13 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+13:22:13 [INFO] Listening for wake word...
+13:22:31 [INFO] Wake word 'jarvis' detected from typed input.
+13:22:31 [INFO] [JARVIS] → Yes?
+13:22:40 [INFO] Command received: set reminder at 3pm
+13:22:40 [INFO] Routing to skill: PersonalAssistantSkill
+13:22:40 [INFO] [JARVIS] → [Reminders] Tell me what to remind you about.
+13:22:44 [INFO] Listening for wake word...
+13:22:48 [INFO] Wake word 'jarvis' detected from typed input.
+13:22:48 [INFO] [JARVIS] → Yes?
+13:23:03 [INFO] Command received: remind me about the maths sums
+13:23:03 [INFO] Routing to skill: PersonalAssistantSkill
+13:23:03 [INFO] [PersonalAssistantSkill] Saved reminder #17
+13:23:03 [INFO] [JARVIS] → [Reminders] Reminder saved for no specific time: about the maths sums
+13:23:08 [INFO] Listening for wake word...

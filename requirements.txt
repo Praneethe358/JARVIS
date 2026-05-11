@@ -4,7 +4,6 @@
 # ╚═══════════════════════════════════════════════════════╝
 
 # ── Core AI & Voice ──────────────────────────────────────
-openai>=1.40.0             # OpenAI API (AI brain)
 SpeechRecognition>=3.10    # STT (speech-to-text)
 pyttsx3>=2.90              # TTS (text-to-speech, offline)
 pyaudio>=0.2.13            # Microphone access
@@ -20,7 +19,7 @@ face-recognition>=1.3.0    # requires dlib
 numpy>=1.26.0
 
 # ── Offline STT (optional) ───────────────────────────────
-# openai-whisper             # uncomment for offline transcription
+# offline Whisper model      # uncomment for offline transcription
 # soundfile
 
 # ── Weather & News ───────────────────────────────────────

@@ -1,5 +1,4 @@
 {
-  "openai_api_key": "sk-proj-REMOVED",
   "openweather_api_key": "GET_FREE_KEY_AT_openweathermap.org",
   "newsapi_key": "GET_FREE_KEY_AT_newsapi.org",
   "spotify_client_id": "GET_FROM_developer.spotify.com",

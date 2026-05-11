@@ -84,8 +84,8 @@ class CalendarSkill:
         5. First run: browser opens → authorise access
     """
 
-    triggers = ["calendar", "schedule", "appointment", "meeting", "remind",
-                "what's today", "agenda", "event", "add event"]
+    triggers = ["calendar", "appointment", "meeting", "what's today",
+                "agenda", "event", "add event"]
 
     LOCAL_EVENTS_FILE = "data/local_events.json"  # fallback if no Google auth
 
@@ -93,7 +93,7 @@ class CalendarSkill:
         self._events = self._load_local()
 
     def handle(self, command: str) -> str:
-        if any(w in command for w in ["add", "schedule", "create", "set reminder"]):
+        if any(w in command for w in ["add event", "create event", "set event"]):
             return self._add_event(command)
         else:
             return self._list_events()

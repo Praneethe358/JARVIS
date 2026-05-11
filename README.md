@@ -9,9 +9,9 @@ A fully local, voice-controlled AI assistant that:
 - Wakes up when you say **"JARVIS"**
 - Recognises your **face** before granting access
 - Listens to your **voice commands**
-- Responds intelligently via **OpenAI**
+- Responds with **local assistant logic**
 - Controls your **music, weather, news, calendar, system**, and more
-- Helps you **study** and tracks your **personal analytics**
+- Helps you **study**, manages reminders, and tracks your **personal analytics**
 
 ---
 
@@ -25,7 +25,7 @@ jarvis/
 │
 ├── core/                    ← Core engine
 │   ├── voice.py             ← STT + TTS (mic in, speaker out)
-│   ├── brain.py             ← OpenAI API — AI conversation
+│   ├── brain.py             ← Local conversational brain
 │   ├── wake_word.py         ← "JARVIS" wake word detector
 │   ├── face_auth.py         ← OpenCV face recognition gate
 │   ├── router.py            ← Routes commands to skills
@@ -39,8 +39,9 @@ jarvis/
 │   ├── search.py            ← DuckDuckGo web search
 │   ├── system.py            ← Volume, apps, shutdown, stats
 │   ├── notes.py             ← Voice-dictated notes
+│   ├── personal.py          ← FAQs, schedule, reminders, daily plan
 │   ├── analytics.py         ← Personal usage analytics
-│   └── study.py             ← Study buddy (OpenAI-powered)
+│   └── study.py             ← Local study buddy
 │
 └── data/                    ← Auto-created at runtime
     ├── notes.json
@@ -75,7 +76,6 @@ pip install -r requirements.txt
 
 | Service | Key Needed | Where to Get |
 |---|---|---|
-| OpenAI (brain) | `openai_api_key` | platform.openai.com/api-keys |
 | Weather | `openweather_api_key` | openweathermap.org/api |
 | News | `newsapi_key` | newsapi.org |
 | Spotify | `client_id` + `client_secret` | developer.spotify.com |
@@ -121,8 +121,11 @@ python main.py
 | `Volume up` / `Volume down` | OS audio control |
 | `Battery status` / `CPU usage` | System stats |
 | `Search for quantum computing` | DuckDuckGo search |
-| `Explain backpropagation` | OpenAI explains the topic |
-| `Quiz me on neural networks` | Generates 3 quiz questions |
+| `Explain backpropagation` | Local study explanation |
+| `Quiz me on neural networks` | Generates 3 local quiz questions |
+| `What can you do?` | Shows assistant features |
+| `Remind me to submit assignment tomorrow at 6:00` | Saves a reminder |
+| `Add schedule project review on 2026-05-15 at 14:00` | Saves a work/school schedule item |
 | `My analytics` | Shows daily usage stats |
 | `Clear memory` | Resets conversation history |
 | `Shutdown JARVIS` / `Exit` | Closes the program |
@@ -133,9 +136,9 @@ python main.py
 
 | Phase | What to Build | Time |
 |---|---|---|
-| **1** | voice loop + OpenAI brain (main.py, voice.py, brain.py) | 1–2 days |
-| **2** | weather + news + notes + search skills | 2–3 days |
-| **3** | system control + Spotify + calendar | 2–3 days |
+| **1** | voice loop + local brain + typed mode | 1–2 days |
+| **2** | weather + news + notes + search + personal assistant skills | 2–3 days |
+| **3** | system control + Spotify + calendar + reminders | 2–3 days |
 | **4** | GUI (PyQt6 animated orb interface) | 3–4 days |
 | **5** | face recognition + wake word (Porcupine) | 2–3 days |
 | **6** | analytics dashboard + study mode polish | 2–3 days |
@@ -147,7 +150,7 @@ python main.py
 | Upgrade | How |
 |---|---|
 | Natural voice | Replace pyttsx3 with ElevenLabs API |
-| Offline STT | Replace Google STT with `openai-whisper` |
+| Offline STT | Use a local Whisper-style speech model |
 | Better wake word | Use Porcupine (`pvporcupine`) |
 | GUI | Build PyQt6 interface with animated orb |
 | PDF study | Add PyMuPDF to summarise your lecture notes |
