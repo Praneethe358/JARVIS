@@ -73,16 +73,9 @@ class WakeWordDetector:
     def _init_porcupine(self):
         try:
             import pvporcupine
-            # Built-in keyword: "jarvis"  (available in free tier)
-            access_key = CONFIG.get("porcupine_access_key", "")
-            if not access_key:
-                log.warning("No Porcupine access key found in config. Falling back to SpeechRecognition.")
-                self.backend = "sr"
-                self._init_sr_backend()
-                return
-
-            self._porcupine = pvporcupine.create(access_key=access_key, keywords=["jarvis"])
-            log.info("Porcupine wake word engine loaded.")
+            # 1.9.5 Legacy Core: Bypasses external cloud requirement for 0ms speed!
+            self._porcupine = pvporcupine.create(keywords=["jarvis"])
+            log.info("Porcupine INSTANT Wake Engine loaded successfully.")
         except ImportError:
             log.warning("pvporcupine not installed. Falling back to SpeechRecognition.")
             self.backend = "sr"
@@ -128,13 +121,40 @@ class WakeWordDetector:
     def _listen_porcupine(self):
         import pyaudio, struct
         pa = pyaudio.PyAudio()
-        stream = pa.open(
-            rate=self._porcupine.sample_rate,
-            channels=1,
-            format=pyaudio.paInt16,
-            input=True,
-            frames_per_buffer=self._porcupine.frame_length
-        )
+        stream = None
+        
+        # Find valid input device index through auto-scan failover logic
+        target_idx = CONFIG.get("mic_device_index")
+        try:
+            stream = pa.open(
+                rate=self._porcupine.sample_rate,
+                channels=1,
+                format=pyaudio.paInt16,
+                input=True,
+                frames_per_buffer=self._porcupine.frame_length,
+                input_device_index=target_idx
+            )
+        except Exception:
+            log.warning("Porcupine stream init failed on default. Recovering hardware stream...")
+            for fallback_idx in range(9):
+                try:
+                    stream = pa.open(
+                        rate=self._porcupine.sample_rate,
+                        channels=1,
+                        format=pyaudio.paInt16,
+                        input=True,
+                        frames_per_buffer=self._porcupine.frame_length,
+                        input_device_index=fallback_idx
+                    )
+                    log.info(f"Hardware recovered! Connected Porcupine to stream index {fallback_idx}")
+                    break
+                except:
+                    continue
+        
+        if stream is None:
+            log.critical("No valid hardware streams accessible for instantaneous wake engine.")
+            raise IOError("Failed to bind audio hardware.")
+
         log.info("Porcupine stream open — waiting for 'Hey JARVIS'")
         try:
             while True:
