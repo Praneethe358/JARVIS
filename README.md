@@ -1,158 +1,272 @@
-# J.A.R.V.I.S — Personal AI Assistant
-### Just A Rather Very Intelligent System | Built by Praneeth
+<div align="center">
+
+```
+███╗   ██╗███████╗██╗  ██╗██╗   ██╗███████╗
+████╗  ██║██╔════╝╚██╗██╔╝██║   ██║██╔════╝
+██╔██╗ ██║█████╗   ╚███╔╝ ██║   ██║███████╗
+██║╚██╗██║██╔══╝   ██╔██╗ ██║   ██║╚════██║
+██║ ╚████║███████╗██╔╝ ██╗╚██████╔╝███████║
+╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+```
+
+**Neural EXecution & Unified System Automation**
+![alt text](image.png)
+*A Linux-native AI automation framework powered by local LLM reasoning*
+
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Ollama](https://img.shields.io/badge/Ollama-Mistral-black?style=flat-square&logo=ollama&logoColor=white)](https://ollama.com)
+[![Platform](https://img.shields.io/badge/Platform-Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://linux.org)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)]()
+
+</div>
 
 ---
 
-## What This Does
+## Overview
 
-A fully local, voice-controlled AI assistant that:
-- Wakes up when you say **"JARVIS"**
-- Recognises your **face** before granting access
-- Listens to your **voice commands**
-- Responds with **local assistant logic**
-- Controls your **music, weather, news, calendar, system**, and more
-- Helps you **study**, manages reminders, and tracks your **personal analytics**
+**NEXUS** is a modular, voice-driven AI automation framework built natively for Linux. It combines local LLM reasoning via Ollama with a skill-based command router, wake word detection, face authentication, and a real-time TTS/STT voice pipeline — all running fully offline-capable on your own hardware.
+
+Unlike cloud-dependent assistants, NEXUS is designed around **privacy, modularity, and local AI execution**. Every component is independently replaceable, and the Ollama integration means the reasoning core runs entirely on your machine — no API keys, no data leaves your system.
+
+---
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                        main.py                          │
+│                  Orchestration Loop                     │
+└────────┬────────────────────────────────────┬───────────┘
+         │                                    │
+┌────────▼────────┐                  ┌────────▼────────┐
+│  wake_word.py   │                  │    voice.py     │
+│                 │                  │                 │
+│ Porcupine Wake  │                  │ Google STT      │
+│ Word Detection  │                  │ pyttsx3 TTS     │
+│ + SR Fallback   │                  │ 175 WPM Engine  │
+└────────┬────────┘                  └────────┬────────┘
+         │                                    │
+         └──────────────┬─────────────────────┘
+                        │
+               ┌────────▼────────┐
+               │    router.py    │
+               │                 │
+               │  Intent Match   │
+               │  Skill Router   │
+               │  Ollama Fallback│
+               └────────┬────────┘
+                        │
+         ┌──────────────┼──────────────┐
+         │              │              │
+┌────────▼───┐  ┌───────▼──────┐  ┌───▼──────────┐
+│   Skills   │  │  Ollama LLM  │  │  Face Auth   │
+│            │  │              │  │              │
+│ Search     │  │ Mistral Model│  │  OpenCV      │
+│ System     │  │ Context      │  │  Face Recog  │
+│ Music      │  │ Memory Buffer│  │  Module      │
+│ Calendar   │  │              │  │              │
+│ News       │  └──────────────┘  └──────────────┘
+│ Notes      │
+│ Study      │
+└────────────┘
+```
+
+---
+
+## Features
+
+### Core Capabilities
+- **Wake Word Detection** — Porcupine-powered edge AI for sub-second wake word recognition with Google SR fallback
+- **Voice Pipeline** — Google Cloud STT for input + pyttsx3 offline TTS engine at 175 WPM
+- **Local LLM Reasoning** — Ollama + Mistral as the default reasoning fallback for open-ended queries
+- **Short-Term Memory** — Conversation history buffer (last 6 messages) for contextual multi-turn dialogue
+- **Face Authentication** — OpenCV-based face recognition module for user identity verification
+- **Modular Skill System** — Intent-based command routing across 7 independent skill modules
+
+### Integrated Skills
+
+| Skill | Trigger | Description |
+|---|---|---|
+| `SearchSkill` | *"Google..."*, *"What is..."* | Web search with smart truncation for TTS delivery |
+| `SystemSkill` | *"Screenshot"*, *"Lock screen"* | Native Linux system automation via shell |
+| `MusicSkill` | *"Play music"*, *"Next track"* | Spotify control via Spotipy OAuth |
+| `CalendarSkill` | *"Add event"*, *"Schedule..."* | Local JSON event staging |
+| `NewsSkill` | *"What's the news"* | Real-time news API with category filtering |
+| `NotesSkill` | *"Take a note"* | File-based note logging |
+| `StudySkill` | *"Explain..."* | Routed to Ollama for dynamic AI explanations |
+
+### LLM Integration
+- **Graceful fallback** — Ollama activates only when no skill matches, keeping explicit commands fast
+- **TTS sanitization** — Strips all markdown from LLM output before voice delivery
+- **Dynamic model switching** — Switch Ollama models at runtime via voice command
+- **Offline resilience** — Falls back to skill-only mode if Ollama is unreachable
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | Python 3.10+ |
+| LLM Engine | Ollama (Mistral) |
+| Wake Word | Picovoice Porcupine |
+| STT | Google Cloud Speech Recognition |
+| TTS | pyttsx3 (offline) |
+| Face Auth | OpenCV |
+| Music | Spotipy (Spotify Web API) |
+| Config | python-dotenv, config.json |
+
+---
+
+## Installation
+
+### Prerequisites
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull Mistral model
+ollama pull mistral
+
+# Clone NEXUS
+git clone https://github.com/yourusername/nexus.git
+cd nexus
+```
+
+### Setup
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+### Environment Variables
+```env
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+SPOTIFY_REDIRECT_URI=http://localhost:8888/callback
+NEWS_API_KEY=your_news_api_key
+PORCUPINE_ACCESS_KEY=your_porcupine_key   # optional, falls back to SR
+```
+
+### Run
+```bash
+python main.py
+# or if aliased:
+nexus
+```
+
+---
+
+## Boot Sequence
+
+```
+◆ Neural EXecution & Unified System Automation   v3.0
+
+  User   : Praneeth
+  City   : Coimbatore
+  Engine : Mistral via Ollama
+  Voice  : Deep Male · 175WPM
+
+◆ SYSTEM INITIALISATION ────────────────────────
+  ► Voice Engine          [ OK ]
+  ► Reasoning Core        [ OK ]
+  ► Wake Word Detector    [ OK ]
+  ► Face Auth Module      [ OK ]
+  ► Skills Registry       [ OK ]
+  ► Ollama LLM Interface  [ OK ]
+  ► Command Router        [ OK ]
+
+◆ ALL SYSTEMS ONLINE · NEXUS READY
+
+  NEXUS online. All systems operational. Reasoning core active.
+```
+
+---
+
+## Voice Commands
+
+```bash
+# System
+"nexus screenshot"
+"nexus lock screen"
+"nexus open terminal"
+
+# Search & Knowledge
+"nexus what is machine learning"
+"nexus google latest AI news"
+"nexus explain overfitting"        # routed to Ollama
+
+# Music
+"nexus play music"
+"nexus next track"
+"nexus pause"
+
+# Productivity
+"nexus add event meeting tomorrow at 3pm"
+"nexus take a note buy groceries"
+"nexus what's the news"
+
+# LLM Control
+"nexus switch model to llama3"
+"nexus clear memory"
+```
 
 ---
 
 ## Project Structure
 
 ```
-jarvis/
-├── main.py                  ← Entry point (run this)
-├── config.json              ← Your API keys and settings
-├── requirements.txt         ← All pip dependencies
-│
-├── core/                    ← Core engine
-│   ├── voice.py             ← STT + TTS (mic in, speaker out)
-│   ├── brain.py             ← Local conversational brain
-│   ├── wake_word.py         ← "JARVIS" wake word detector
-│   ├── face_auth.py         ← OpenCV face recognition gate
-│   ├── router.py            ← Routes commands to skills
-│   └── config.py            ← Config loader + logger
-│
-├── skills/                  ← Plug-in skill modules
-│   ├── weather.py           ← OpenWeatherMap live weather
-│   ├── news.py              ← NewsAPI top headlines
-│   ├── calendar_skill.py    ← Events and reminders
-│   ├── music.py             ← Spotify playback control
-│   ├── search.py            ← DuckDuckGo web search
-│   ├── system.py            ← Volume, apps, shutdown, stats
-│   ├── notes.py             ← Voice-dictated notes
-│   ├── personal.py          ← FAQs, schedule, reminders, daily plan
-│   ├── analytics.py         ← Personal usage analytics
-│   └── study.py             ← Local study buddy
-│
-└── data/                    ← Auto-created at runtime
-    ├── notes.json
-    ├── analytics.json
-    ├── local_events.json
-    ├── face_encodings.npy
-    └── jarvis.log
+nexus/
+├── main.py                  # Orchestration loop
+├── config.json              # User configuration
+├── .env                     # API credentials (git-ignored)
+├── core/
+│   ├── wake_word.py         # Porcupine + SR wake word
+│   ├── voice.py             # STT/TTS pipeline
+│   ├── router.py            # Intent routing + Ollama fallback
+│   └── face_auth.py         # OpenCV face recognition
+├── skills/
+│   ├── search_skill.py
+│   ├── system_skill.py
+│   ├── music_skill.py
+│   ├── calendar_skill.py
+│   ├── news_skill.py
+│   ├── notes_skill.py
+│   └── study_skill.py
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## Setup Guide (Step by Step)
+## Roadmap
 
-### Step 1 — Prerequisites
-
-- Python 3.11 or higher
-- A working microphone and speakers
-
-### Step 2 — Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-> Windows users: if `pyaudio` fails:
-> ```
-> pip install pipwin
-> pipwin install pyaudio
-> ```
-
-### Step 3 — Get API Keys (all free)
-
-| Service | Key Needed | Where to Get |
-|---|---|---|
-| Weather | `openweather_api_key` | openweathermap.org/api |
-| News | `newsapi_key` | newsapi.org |
-| Spotify | `client_id` + `client_secret` | developer.spotify.com |
-
-### Step 4 — Edit config.json
-
-Open `config.json` and add your local API keys, or set them through environment variables before running JARVIS. Keep secrets out of version control and change `city` to your city.
-
-### Step 5 — Enroll Your Face (Optional)
-
-```python
-# Run this ONCE to register your face with JARVIS
-from core.face_auth import FaceAuth
-auth = FaceAuth()
-auth.enroll("Praneeth")   # looks at your webcam for ~3 seconds
-```
-
-Then set `"face_auth_enabled": true` in `config.json`.
-
-### Step 6 — Run JARVIS
-
-```bash
-cd jarvis
-python main.py
-```
+- [ ] LangChain integration for multi-step reasoning chains
+- [ ] RAG pipeline for personal knowledge base queries
+- [ ] Google Calendar API sync
+- [ ] Home automation skill (MQTT / smart devices)
+- [ ] Web dashboard for skill management
+- [ ] Docker containerization
 
 ---
 
-## Voice Commands Reference
+## About
 
-| What to Say | What Happens |
-|---|---|
-| `JARVIS` | Wake word — activates listening |
-| `What's the weather?` | Live weather for your city |
-| `Read me the news` | Top 5 tech headlines |
-| `Play Believer by Imagine Dragons` | Spotify search + play |
-| `Pause music` / `Next song` | Spotify playback control |
-| `Add event team meeting on 2025-06-15 at 10:00` | Saves to calendar |
-| `What's on my calendar?` | Lists upcoming events |
-| `Take note: buy groceries tomorrow` | Saves timestamped note |
-| `Show my notes` | Reads recent notes |
-| `Open Chrome` / `Take screenshot` | System control |
-| `Volume up` / `Volume down` | OS audio control |
-| `Battery status` / `CPU usage` | System stats |
-| `Search for quantum computing` | DuckDuckGo search |
-| `Explain backpropagation` | Local study explanation |
-| `Quiz me on neural networks` | Generates 3 local quiz questions |
-| `What can you do?` | Shows assistant features |
-| `Remind me to submit assignment tomorrow at 6:00` | Saves a reminder |
-| `Add schedule project review on 2026-05-15 at 14:00` | Saves a work/school schedule item |
-| `My analytics` | Shows daily usage stats |
-| `Clear memory` | Resets conversation history |
-| `Shutdown JARVIS` / `Exit` | Closes the program |
+Built by **Praneeth** — AI & Data Science student at Karunya Institute of Technology.
+
+Interested in AI systems, computer vision, and building things that actually work.
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat-square&logo=linkedin)](https://linkedin.com/in/yourprofile)
+[![Portfolio](https://img.shields.io/badge/Portfolio-praneeth.tech-000000?style=flat-square&logo=vercel)](https://praneeth.tech)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=flat-square&logo=github)](https://github.com/yourusername)
 
 ---
 
-## Build Phases
-
-| Phase | What to Build | Time |
-|---|---|---|
-| **1** | voice loop + local brain + typed mode | 1–2 days |
-| **2** | weather + news + notes + search + personal assistant skills | 2–3 days |
-| **3** | system control + Spotify + calendar + reminders | 2–3 days |
-| **4** | GUI (PyQt6 animated orb interface) | 3–4 days |
-| **5** | face recognition + wake word (Porcupine) | 2–3 days |
-| **6** | analytics dashboard + study mode polish | 2–3 days |
-
----
-
-## Upgrading for Portfolio Impact
-
-| Upgrade | How |
-|---|---|
-| Natural voice | Replace pyttsx3 with ElevenLabs API |
-| Offline STT | Use a local Whisper-style speech model |
-| Better wake word | Use Porcupine (`pvporcupine`) |
-| GUI | Build PyQt6 interface with animated orb |
-| PDF study | Add PyMuPDF to summarise your lecture notes |
-| IoT control | Add MQTT for smart home integration |
-| Gesture unlock | Integrate your MediaPipe gesture project |
+<div align="center">
+<sub>NEXUS · Neural EXecution & Unified System Automation</sub>
+</div>
