@@ -100,7 +100,24 @@ class WakeWordDetector:
             devnull, saved = _suppress_stderr()
             try:
                 idx = CONFIG.get("mic_device_index")
-                self.mic = sr.Microphone(device_index=idx)
+                try:
+                    self.mic = sr.Microphone(device_index=idx)
+                    with self.mic as source:
+                        pass 
+                except Exception:
+                    log.warning("Fallback Scan triggered in Wake Engine...")
+                    found = False
+                    for fallback_idx in range(9):
+                        try:
+                            self.mic = sr.Microphone(device_index=fallback_idx)
+                            with self.mic as source:
+                                pass
+                            found = True
+                            break
+                        except:
+                            continue
+                    if not found:
+                        raise Exception("Zero usable hardware found in Wake cycle.")
             finally:
                 _restore_stderr(devnull, saved)
         except Exception as e:

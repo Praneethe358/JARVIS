@@ -12,5 +12,5 @@
   "face_auth_enabled": false,
   "news_country": "in",
   "news_category": "technology",
-  "mic_device_index": 11
+  "mic_device_index": null
 }

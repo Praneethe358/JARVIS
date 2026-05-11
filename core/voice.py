@@ -67,9 +67,32 @@ class VoiceEngine:
                 devnull, saved = _suppress_stderr()
                 try:
                     idx = CONFIG.get("mic_device_index")
-                    self.mic = sr.Microphone(device_index=idx)
+                    # Try preferred/default first
+                    try:
+                        self.mic = sr.Microphone(device_index=idx)
+                        with self.mic as source:
+                            pass # verified
+                        log.info(f"Successfully bonded to Mic Index {idx if idx is not None else 'Default'}")
+                    except Exception:
+                        # FALLBACK SCAN: Cycle 0-8 to find valid hardware
+                        log.warning("Default mic path blocked. Scanning for open hardware port...")
+                        found = False
+                        for fallback_idx in range(9):
+                            try:
+                                self.mic = sr.Microphone(device_index=fallback_idx)
+                                with self.mic as source:
+                                    pass
+                                log.info(f"Recovered! Connected to available Port {fallback_idx}")
+                                found = True
+                                break
+                            except:
+                                continue
+                        if not found:
+                            raise Exception("Total Hardware Lockdown: No readable audio inputs discovered.")
+
                     with self.mic as source:
-                        self.recognizer.adjust_for_ambient_noise(source, duration=1)
+                        # Gentle adjustment cap
+                        self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
                 finally:
                     _restore_stderr(devnull, saved)
             except Exception as e:
