@@ -11,7 +11,7 @@
     "text": "add reminder",
     "created_at": "2026-05-11T13:14:31",
     "due_at": "2026-05-11T14:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 3,
@@ -25,14 +25,14 @@
     "text": "add reminder",
     "created_at": "2026-05-11T13:14:31",
     "due_at": "2026-05-11T14:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 5,
     "text": "buy milk",
     "created_at": "2026-05-11T13:15:09",
     "due_at": "2026-05-11T14:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 6,
@@ -46,7 +46,7 @@
     "text": "buy milk",
     "created_at": "2026-05-11T13:16:46",
     "due_at": "2026-05-11T14:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 8,
@@ -60,7 +60,7 @@
     "text": "buy milk",
     "created_at": "2026-05-11T13:17:54",
     "due_at": "2026-05-11T14:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 10,
@@ -74,7 +74,7 @@
     "text": "buy milk",
     "created_at": "2026-05-11T13:19:23",
     "due_at": "2026-05-11T14:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 12,
@@ -95,7 +95,7 @@
     "text": "buy milk",
     "created_at": "2026-05-11T13:21:23",
     "due_at": "2026-05-11T14:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 15,
@@ -123,6 +123,6 @@
     "text": "the maths sums",
     "created_at": "2026-05-11T13:29:15",
     "due_at": "2026-05-11T15:00:00",
-    "done": false
+    "done": true
   }
 ]

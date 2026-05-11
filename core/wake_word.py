@@ -16,9 +16,25 @@ USAGE:
 """
 
 import time
+import os
 import speech_recognition as sr
 from core.logger import log
 from core.config import CONFIG
+import core.ui as ui
+
+
+def _suppress_stderr():
+    """Return (devnull_fd, saved_stderr_fd) — caller must restore and close."""
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    saved  = os.dup(2)
+    os.dup2(devnull, 2)
+    return devnull, saved
+
+
+def _restore_stderr(devnull_fd, saved_fd):
+    os.dup2(saved_fd, 2)
+    os.close(devnull_fd)
+    os.close(saved_fd)
 
 
 class WakeWordDetector:
@@ -58,23 +74,34 @@ class WakeWordDetector:
         try:
             import pvporcupine
             # Built-in keyword: "jarvis"  (available in free tier)
-            self._porcupine = pvporcupine.create(keywords=["jarvis"])
+            access_key = CONFIG.get("porcupine_access_key", "")
+            if not access_key:
+                log.warning("No Porcupine access key found in config. Falling back to SpeechRecognition.")
+                self.backend = "sr"
+                self._init_sr_backend()
+                return
+
+            self._porcupine = pvporcupine.create(access_key=access_key, keywords=["jarvis"])
             log.info("Porcupine wake word engine loaded.")
         except ImportError:
             log.warning("pvporcupine not installed. Falling back to SpeechRecognition.")
             self.backend = "sr"
             self._init_sr_backend()
         except Exception as e:
-            log.error(f"Porcupine init failed: {e}. Falling back.")
+            log.warning(f"Porcupine unavailable ({e}). Falling back to SpeechRecognition.")
             self.backend = "sr"
             self._init_sr_backend()
 
     def _init_sr_backend(self):
         self.recognizer = sr.Recognizer()
-        self.recognizer.energy_threshold = 250
-        self.recognizer.dynamic_energy_threshold = True
+        self.recognizer.energy_threshold = 400
+        self.recognizer.dynamic_energy_threshold = False  # Prevent it from going deaf in noisy environments
         try:
-            self.mic = sr.Microphone()
+            devnull, saved = _suppress_stderr()
+            try:
+                self.mic = sr.Microphone()
+            finally:
+                _restore_stderr(devnull, saved)
         except Exception as e:
             self.mic = None
             log.warning(f"Wake word microphone unavailable. Using typed wake word mode: {e}")
@@ -115,23 +142,26 @@ class WakeWordDetector:
         """
         if self.mic is None:
             while True:
-                typed = input("⌨️  Type wake word: ").strip().lower()
+                typed = ui.prompt_wake().strip().lower()
                 if self.keyword in typed:
                     log.info(f"Wake word '{self.keyword}' detected from typed input.")
                     return
             
-        with self.mic as source:
-            self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
+        # We use a static energy threshold now, so we skip adjusting for ambient noise
+        # to prevent sudden bursts of noise from causing the threshold to spike.
 
         while True:
             try:
-                with self.mic as source:
-                    # Short phrase limit = low latency wake detection
-                    audio = self.recognizer.listen(
-                        source,
-                        timeout=None,
-                        phrase_time_limit=3
-                    )
+                devnull, saved = _suppress_stderr()
+                try:
+                    with self.mic as source:
+                        audio = self.recognizer.listen(
+                            source,
+                            timeout=None,
+                            phrase_time_limit=3
+                        )
+                finally:
+                    _restore_stderr(devnull, saved)
                 try:
                     text = self.recognizer.recognize_google(audio).lower()
                     if self.keyword in text:
@@ -149,7 +179,7 @@ class WakeWordDetector:
 
     def _listen_typed(self):
         while True:
-            typed = input("⌨️  Type wake word: ").strip().lower()
+            typed = ui.prompt_wake().strip().lower()
             if self.keyword in typed:
                 log.info(f"Wake word '{self.keyword}' detected from typed input.")
                 return

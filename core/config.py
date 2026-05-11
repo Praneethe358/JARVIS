@@ -19,10 +19,11 @@ _DEFAULT_CONFIG = {
     "newsapi_key"          : os.getenv("NEWSAPI_KEY", ""),
     "spotify_client_id"    : os.getenv("SPOTIFY_CLIENT_ID", ""),
     "spotify_client_secret": os.getenv("SPOTIFY_CLIENT_SECRET", ""),
+    "porcupine_access_key" : os.getenv("PORCUPINE_ACCESS_KEY", ""),
     "city"                 : "Coimbatore",
     "user_name"            : "Praneeth",
     "stt_backend"          : "google",     # "google" | "whisper"
-    "wake_backend"         : "sr",          # "sr"     | "porcupine"
+    "wake_backend"         : "sr",         # "sr"     | "porcupine"
     "tts_rate"             : 175,
     "tts_volume"           : 0.9,
     "face_auth_enabled"    : False,
@@ -61,14 +62,35 @@ CONFIG = _load_config()
 # ── logger.py ────────────────────────────────────────────────────────────────
 
 import logging
+import os
+
+os.makedirs("data", exist_ok=True)
+
+# File handler — full verbose log
+_file_handler = logging.FileHandler("data/jarvis.log", mode="a")
+_file_handler.setLevel(logging.DEBUG)
+_file_handler.setFormatter(logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"
+))
+
+# Console handler — WARN and above only (critical runtime alerts)
+import core.ui as _ui
+
+class _UIHandler(logging.Handler):
+    """Routes WARN/ERROR log records through the styled ui.status() lines."""
+    def emit(self, record):
+        msg = self.format(record)
+        if record.levelno >= logging.ERROR:
+            _ui.status(msg, "err")
+        elif record.levelno >= logging.WARNING:
+            _ui.status(msg, "warn")
+
+_console_handler = _UIHandler()
+_console_handler.setLevel(logging.WARNING)
+_console_handler.setFormatter(logging.Formatter("%(message)s"))
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%H:%M:%S",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("data/jarvis.log", mode="a")
-    ]
+    level=logging.DEBUG,
+    handlers=[_file_handler, _console_handler],
 )
 log = logging.getLogger("JARVIS")

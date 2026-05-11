@@ -143,3 +143,215 @@
 13:52:00 [INFO] Routing to skill: MusicSkill
 13:52:00 [INFO] [JARVIS] → [Music] Opening Spotify in your browser.
 13:52:03 [INFO] Listening for wake word...
+13:55:09 [INFO] Wake word 'jarvis' detected from typed input.
+13:55:09 [INFO] [JARVIS] → Yes?
+13:55:25 [INFO] Command received: wht is 2+2
+13:55:25 [INFO] No skill matched — routing to Brain.
+13:55:25 [INFO] [JARVIS] → I can help with local tasks, notes, reminders, schedule management, app launching, and study explanations. Try asking for help, your schedule, or a specific app to open.
+13:55:37 [INFO] Listening for wake word...
+13:55:43 [INFO] Wake word 'jarvis' detected from typed input.
+13:55:43 [INFO] [JARVIS] → Yes?
+13:55:50 [INFO] Command received: tell me my schedule
+13:55:50 [INFO] Routing to skill: PersonalAssistantSkill
+13:55:50 [INFO] [JARVIS] → JARVIS daily plan for Praneeth:
+- No schedule entries for today.
+Active reminders:
+- submit assignment
+- about the maths sums
+- the maths sums
+13:56:00 [INFO] Listening for wake word...
+14:26:48 [INFO] Initialising JARVIS subsystems...
+14:26:48 [INFO] Selected TTS voice: gmw/en-us+m3
+14:26:48 [INFO] Calibrating microphone for ambient noise...
+14:26:49 [INFO] VoiceEngine initialised.
+14:26:49 [INFO] Local Brain initialised.
+14:26:49 [ERROR] Porcupine init failed: create() missing 1 required positional argument: 'access_key'. Falling back.
+14:26:49 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: sr
+14:26:49 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+14:26:49 [INFO] Router loaded with 10 skills.
+14:26:49 [INFO] All systems online. JARVIS ready.
+14:26:49 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+14:26:49 [INFO] [JARVIS] → Reminder: add reminder
+14:26:56 [INFO] [JARVIS] → Reminder: add reminder
+14:26:59 [INFO] [JARVIS] → Reminder: buy milk
+14:27:01 [INFO] [JARVIS] → Reminder: buy milk
+14:27:04 [INFO] [JARVIS] → Reminder: buy milk
+14:27:06 [INFO] [JARVIS] → Reminder: buy milk
+14:27:08 [INFO] [JARVIS] → Reminder: buy milk
+14:27:11 [INFO] Listening for wake word...
+14:39:08 [INFO] Initialising JARVIS subsystems...
+14:39:08 [INFO] Selected TTS voice: gmw/en-us+m3
+14:39:09 [INFO] Calibrating microphone for ambient noise...
+14:39:10 [INFO] VoiceEngine initialised.
+14:39:10 [INFO] Local Brain initialised.
+14:39:10 [ERROR] Porcupine init failed: create() missing 1 required positional argument: 'access_key'. Falling back.
+14:39:10 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: sr
+14:39:10 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+14:39:10 [INFO] Router loaded with 10 skills.
+14:39:11 [INFO] All systems online. JARVIS ready.
+14:39:11 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+14:39:11 [INFO] Listening for wake word...
+14:41:22 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:41:22 [INFO] [JARVIS] → Yes?
+14:41:29 [INFO] Command received: tell me date
+14:41:29 [INFO] No skill matched — routing to Brain.
+14:41:29 [INFO] [JARVIS] → I can help with local tasks, notes, reminders, schedule management, app launching, and study explanations. Try asking for help, your schedule, or a specific app to open.
+14:41:43 [INFO] Listening for wake word...
+14:41:47 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:41:47 [INFO] [JARVIS] → Yes?
+14:41:51 [INFO] Command received: open spotify
+14:41:51 [INFO] Routing to skill: MusicSkill
+14:41:51 [INFO] [JARVIS] → [Music] Opening Spotify in your browser.
+14:41:54 [INFO] Listening for wake word...
+14:42:09 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:42:09 [INFO] [JARVIS] → Yes?
+14:42:12 [INFO] Command received: open chrome
+14:42:12 [INFO] Routing to skill: SystemSkill
+14:42:12 [INFO] [JARVIS] → [System] Opening chrome.
+14:42:15 [INFO] Listening for wake word...
+14:42:24 [INFO] Wake word 'jarvis' detected in: 'hey jarvis'
+14:42:24 [INFO] [JARVIS] → Yes?
+14:42:24 [INFO] Wake word 'jarvis' detected in: 'hey jarvis'
+14:42:24 [INFO] [JARVIS] → Yes?
+14:42:31 [INFO] Command received: open github and chat gb
+14:42:31 [INFO] Routing to skill: SystemSkill
+14:42:31 [INFO] [JARVIS] → [System] Opening github and chat gb.
+14:42:31 [INFO] Command received: open github and chat gpt
+14:42:31 [INFO] Routing to skill: SystemSkill
+14:42:31 [INFO] [JARVIS] → [System] Opening github and chat gpt.
+14:42:35 [INFO] Listening for wake word...
+14:42:35 [INFO] Listening for wake word...
+14:42:44 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:42:44 [INFO] [JARVIS] → Yes?
+14:42:45 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:42:45 [INFO] [JARVIS] → Yes?
+14:42:48 [INFO] Command received: open spotify
+14:42:48 [INFO] Routing to skill: MusicSkill
+14:42:48 [INFO] Command received: open spotify
+14:42:48 [INFO] Routing to skill: MusicSkill
+14:42:48 [INFO] [JARVIS] → [Music] Opening Spotify in your browser.
+14:42:48 [INFO] [JARVIS] → [Music] Opening Spotify in your browser.
+14:42:52 [INFO] Listening for wake word...
+14:42:52 [INFO] Listening for wake word...
+14:43:04 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:43:04 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:43:04 [INFO] [JARVIS] → Yes?
+14:43:04 [INFO] [JARVIS] → Yes?
+14:43:11 [INFO] Command received: can you tell me what are the functions you do
+14:43:11 [INFO] No skill matched — routing to Brain.
+14:43:11 [INFO] [JARVIS] → I can help with local tasks, notes, reminders, schedule management, app launching, and study explanations. Try asking for help, your schedule, or a specific app to open.
+14:43:11 [INFO] Command received: can you tell me what are the functions you do
+14:43:11 [INFO] No skill matched — routing to Brain.
+14:43:11 [INFO] [JARVIS] → I can help with local tasks, notes, reminders, schedule management, app launching, and study explanations. Try asking for help, your schedule, or a specific app to open.
+14:43:25 [INFO] Listening for wake word...
+14:43:25 [INFO] Listening for wake word...
+14:43:31 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:43:31 [INFO] [JARVIS] → Yes?
+14:43:31 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:43:31 [INFO] [JARVIS] → Yes?
+14:43:38 [INFO] Command received: what are the reminders i
+14:43:38 [INFO] Command received: what are the reminders
+14:43:38 [INFO] Routing to skill: PersonalAssistantSkill
+14:43:38 [INFO] [JARVIS] → Active reminders:
+#13 [2026-05-12T18:00:00]: submit assignment
+#15 [2026-05-12T14:30:00]: buy groceries
+#16 [2026-05-12T18:00:00]: submit assignment
+#17 [unscheduled]: about the maths sums
+#18 [2026-05-11T15:00:00]: the maths sums
+14:43:38 [INFO] Routing to skill: PersonalAssistantSkill
+14:43:38 [INFO] [JARVIS] → Active reminders:
+#13 [2026-05-12T18:00:00]: submit assignment
+#15 [2026-05-12T14:30:00]: buy groceries
+#16 [2026-05-12T18:00:00]: submit assignment
+#17 [unscheduled]: about the maths sums
+#18 [2026-05-11T15:00:00]: the maths sums
+14:44:16 [INFO] Listening for wake word...
+14:44:16 [INFO] Listening for wake word...
+14:44:19 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:44:19 [INFO] [JARVIS] → Yes?
+14:44:24 [INFO] Command received: open anti gravity in desktop
+14:44:24 [INFO] Routing to skill: SystemSkill
+14:44:25 [INFO] [JARVIS] → [System] Opening anti gravity in desktop.
+14:44:28 [INFO] Listening for wake word...
+14:44:42 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:44:42 [INFO] [JARVIS] → Yes?
+14:44:42 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:44:42 [INFO] [JARVIS] → Yes?
+14:44:47 [INFO] Command received: can you work offline
+14:44:47 [INFO] Command received: can you work offline
+14:44:47 [INFO] No skill matched — routing to Brain.
+14:44:47 [INFO] [JARVIS] → I can help with local tasks, notes, reminders, schedule management, app launching, and study explanations. Try asking for help, your schedule, or a specific app to open.
+14:44:47 [INFO] No skill matched — routing to Brain.
+14:44:47 [INFO] [JARVIS] → I can help with local tasks, notes, reminders, schedule management, app launching, and study explanations. Try asking for help, your schedule, or a specific app to open.
+14:45:01 [INFO] Listening for wake word...
+14:45:01 [INFO] Listening for wake word...
+14:49:35 [INFO] Initialising JARVIS subsystems...
+14:49:35 [INFO] Selected TTS voice: gmw/en-us+m3
+14:49:36 [INFO] Calibrating microphone for ambient noise...
+14:49:37 [INFO] VoiceEngine initialised.
+14:49:37 [INFO] Local Brain initialised.
+14:49:37 [ERROR] Porcupine init failed: create() missing 1 required positional argument: 'access_key'. Falling back.
+14:49:37 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: sr
+14:49:37 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+14:49:37 [INFO] Router loaded with 10 skills.
+14:49:39 [INFO] All systems online. JARVIS ready.
+14:49:39 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+14:49:39 [INFO] Listening for wake word...
+14:49:48 [INFO] Wake word 'jarvis' detected in: 'jarvis'
+14:49:48 [INFO] [JARVIS] → Yes?
+14:49:57 [INFO] [JARVIS] → I didn't catch that. Try again.
+14:50:01 [INFO] Listening for wake word...
+14:55:55 [INFO] Initialising JARVIS subsystems...
+14:55:55 [DEBUG] Attempting to set voice to: gmw/en
+14:55:55 [DEBUG] Successfully set voice to: gmw/en
+14:55:55 [INFO] Selected TTS voice: gmw/en-us+m3
+14:55:55 [INFO] Calibrating microphone for ambient noise...
+14:55:56 [INFO] VoiceEngine initialised.
+14:55:56 [INFO] Local Brain initialised.
+14:55:56 [ERROR] Porcupine init failed: create() missing 1 required positional argument: 'access_key'. Falling back.
+14:55:56 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: sr
+14:55:56 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+14:55:56 [INFO] Router loaded with 10 skills.
+14:55:58 [INFO] All systems online. JARVIS ready.
+14:55:58 [DEBUG] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+14:55:58 [DEBUG] Attempting to set voice to: gmw/en-us+m3
+14:55:58 [DEBUG] Successfully set voice to: gmw/en-us+m3
+14:55:58 [DEBUG] Attempting to set voice to: gmw/en-us+m3
+14:55:58 [DEBUG] Successfully set voice to: gmw/en-us+m3
+14:55:58 [INFO] Listening for wake word...
+14:58:39 [INFO] Initialising JARVIS subsystems...
+14:58:39 [DEBUG] Attempting to set voice to: gmw/en
+14:58:39 [DEBUG] Successfully set voice to: gmw/en
+14:58:39 [INFO] Selected TTS voice: gmw/en-us+m3
+14:58:39 [INFO] Calibrating microphone for ambient noise...
+14:58:40 [INFO] VoiceEngine initialised.
+14:58:40 [INFO] Local Brain initialised.
+14:58:40 [WARNING] Porcupine unavailable (create() missing 1 required positional argument: 'access_key'). Falling back to SpeechRecognition.
+14:58:40 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: sr
+14:58:40 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+14:58:40 [INFO] Router loaded with 10 skills.
+14:58:42 [INFO] All systems online. JARVIS ready.
+14:58:42 [DEBUG] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+14:58:42 [DEBUG] Attempting to set voice to: gmw/en-us+m3
+14:58:42 [DEBUG] Successfully set voice to: gmw/en-us+m3
+14:58:42 [DEBUG] Attempting to set voice to: gmw/en-us+m3
+14:58:42 [DEBUG] Successfully set voice to: gmw/en-us+m3
+14:58:42 [INFO] Listening for wake word...
+15:03:58 [INFO] Initialising JARVIS subsystems...
+15:03:58 [DEBUG] Attempting to set voice to: gmw/en
+15:03:58 [DEBUG] Successfully set voice to: gmw/en
+15:03:58 [INFO] Selected TTS voice: gmw/en-us+m3
+15:03:58 [INFO] VoiceEngine initialised.
+15:03:58 [INFO] Local Brain initialised.
+15:03:58 [WARNING] No Porcupine access key found in config. Falling back to SpeechRecognition.
+15:03:58 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: sr
+15:03:58 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+15:03:58 [INFO] Router loaded with 10 skills.
+15:04:00 [INFO] All systems online. JARVIS ready.
+15:04:00 [DEBUG] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+15:04:00 [DEBUG] Attempting to set voice to: gmw/en-us+m3
+15:04:00 [DEBUG] Successfully set voice to: gmw/en-us+m3
+15:04:00 [DEBUG] Attempting to set voice to: gmw/en-us+m3
+15:04:00 [DEBUG] Successfully set voice to: gmw/en-us+m3
+15:04:00 [DEBUG] [JARVIS] → Reminder: the maths sums
+15:04:07 [INFO] Listening for wake word...

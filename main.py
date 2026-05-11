@@ -22,7 +22,10 @@ QUICK START — run this file to start JARVIS.
 """
 
 import time
+import os
+import sys
 import threading
+import core.ui as ui
 from core.voice      import VoiceEngine
 from core.brain      import Brain
 from core.wake_word  import WakeWordDetector
@@ -54,7 +57,14 @@ class JARVIS:
     """
 
     def __init__(self):
+        # Show animated banner first
+        ui.banner(animate=True)
+
         log.info("Initialising JARVIS subsystems...")
+        # Suppress ALSA/JACK noise from PyAudio by redirecting stderr during init
+        _devnull = os.open(os.devnull, os.O_WRONLY)
+        _old_stderr = os.dup(2)
+        os.dup2(_devnull, 2)
 
         # ── Core engines ──────────────────────────────────
         self.voice   = VoiceEngine()
@@ -78,71 +88,46 @@ class JARVIS:
         self.router = CommandRouter(skills, self.brain)
         self.personal = next((s for s in skills if s.__class__.__name__ == "PersonalAssistantSkill"), None)
 
+        # Restore stderr
+        os.dup2(_old_stderr, 2)
+        os.close(_devnull)
+        os.close(_old_stderr)
+
+        # Animated boot sequence
+        ui.boot_sequence()
         log.info("All systems online. JARVIS ready.")
 
     # ──────────────────────────────────────────────────────
     def _show_startup_menu(self):
-        """Display interactive startup menu with commands and shortcuts."""
-        menu = """
-╔════════════════════════════════════════════════════════════════════════╗
-║                     📋 COMMAND REFERENCE                               ║
-╠════════════════════════════════════════════════════════════════════════╣
-║                                                                        ║
-║  🎤 VOICE COMMANDS (say after "jarvis"):                              ║
-║  ─────────────────────────────────────────────────────────────────   ║
-║    💬 "who are you"              → Meet JARVIS                         ║
-║    ⏰ "what's the time"          → Get current time                    ║
-║    📅 "what's today's date"     → Get today's date                    ║
-║    🎵 "play music"              → Spotify playback                    ║
-║    🔍 "search [query]"          → Web search via DuckDuckGo           ║
-║    📝 "take a note [text]"      → Save quick note                     ║
-║    🔔 "remind me [task]"        → Set reminder with time              ║
-║    📅 "add schedule [event]"    → Add work schedule item             ║
-║    💡 "help"                    → List all features                   ║
-║                                                                        ║
-║  ⚡ SHORTCUTS (Typed Mode):                                            ║
-║  ─────────────────────────────────────────────────────────────────   ║
-║    wake word     → "jarvis" (in any text)                            ║
-║    type command  → Enter command at prompt                            ║
-║    exit          → "exit" or "goodbye" or "shutdown jarvis"          ║
-║    clear memory  → "clear memory" or "reset brain"                  ║
-║                                                                        ║
-║  📚 SKILL CATEGORIES:                                                 ║
-║  ─────────────────────────────────────────────────────────────────   ║
-║    🌤️  Weather      → "weather", "forecast"                          ║
-║    📰 News          → "news", "headlines", "latest"                  ║
-║    🎼 Music         → "play", "pause", "next", "previous"            ║
-║    🔍 Search        → "search", "look up", "find"                    ║
-║    🖥️  System       → "volume", "open app", "screenshot"             ║
-║    📔 Notes         → "note", "save", "list notes"                   ║
-║    🎓 Study         → "quiz", "explain", "summarize"                 ║
-║    ⏰ Reminders     → "reminder", "schedule", "task"                 ║
-║                                                                        ║
-╚════════════════════════════════════════════════════════════════════════╝
-
-"""
-        print(menu)
-        print("\n" + "="*76)
-        print(f"{'═':^76}")
-        print(f"{'🎯 Press Enter to begin. Say "jarvis" to wake me up.':^76}")
-        print(f"{'═':^76}")
-        print("="*76 + "\n")
-        input("\n>>> Ready? Press Enter to start...")
+        """Display interactive startup menu — delegates to core.ui."""
+        ui.startup_menu()
 
     def run(self):
-        """Main event loop with modern terminal UI."""
-        # Show startup menu with commands
-        self._show_startup_menu()
+        """Main event loop with premium terminal UI."""
+        from core.config import CONFIG
+        
+        # Only show menu in typed mode
+        is_voice_mode = CONFIG.get("stt_backend") != "typed"
+        if not is_voice_mode:
+            self._show_startup_menu()
+        
+        if is_voice_mode:
+            ui.status("VOICE MODE ACTIVE — listening for 'jarvis' wake word", "wait")
         
         self.voice.speak("JARVIS online. Awaiting your command, Praneeth.")
-        print("\n" + "─"*76)
-        print(f"{'🟢 JARVIS ACTIVE':^76}")
-        print("─"*76 + "\n")
+        ui.divider()
+        ui.status("JARVIS ACTIVE", "ok")
+        ui.divider()
+
+        _last_reminder_check = 0  # epoch seconds; 0 forces check on first iteration
 
         while True:
-            if self.personal:
+            # Check due reminders at most once every 60 seconds
+            if self.personal and (time.time() - _last_reminder_check >= 60):
                 for reminder in self.personal.check_due_reminders():
+                    ui.reminder_box(reminder)   # styled orange alert
                     self.voice.speak(reminder)
+                _last_reminder_check = time.time()
 
             # 1. Block until wake word heard
             log.info("Listening for wake word...")
@@ -160,16 +145,19 @@ class JARVIS:
                 self.voice.speak("I didn't catch that. Try again.")
                 continue
 
-            log.info(f"Command received: {command}")
+            log.debug(f"Command received: {command}")
 
-            # 4. Route and execute
-            response = self.router.handle(command)
+            # 4. Route and execute (with spinner)
+            response = ""
+            with ui.spinner("Thinking"):
+                response = self.router.handle(command)
 
             # 5. Speak response
             self.voice.speak(response)
 
             if any(w in command.lower() for w in ["exit", "shutdown jarvis", "goodbye"]):
                 log.info("Shutdown command received. Exiting main loop.")
+                ui.shutdown_banner(CONFIG.get("user_name", "Praneeth"))
                 break
 
             # 6. Log analytics

@@ -12,12 +12,28 @@ INSTALL:
     pip install elevenlabs                  # optional: premium TTS
 """
 
+import os
 import speech_recognition as sr
 import pyttsx3
 import threading
 from typing import Optional
 from core.logger import log
 from core.config import CONFIG
+import core.ui as ui
+
+
+def _suppress_stderr():
+    """Redirect fd 2 to /dev/null; return (devnull_fd, saved_fd) to restore."""
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    saved   = os.dup(2)
+    os.dup2(devnull, 2)
+    return devnull, saved
+
+
+def _restore_stderr(devnull_fd, saved_fd):
+    os.dup2(saved_fd, 2)
+    os.close(devnull_fd)
+    os.close(saved_fd)
 
 
 class VoiceEngine:
@@ -38,8 +54,8 @@ class VoiceEngine:
         # ── STT setup ──────────────────────────────────────
         self.backend = CONFIG.get("stt_backend", "google")
         self.recognizer = sr.Recognizer()
-        self.recognizer.energy_threshold    = 300   # mic sensitivity
-        self.recognizer.dynamic_energy_threshold = True
+        self.recognizer.energy_threshold    = 400   # Set static threshold
+        self.recognizer.dynamic_energy_threshold = False # Prevent ambient noise from breaking mic
         self.recognizer.pause_threshold     = 0.8   # seconds of silence = end
 
         self.mic: Optional[sr.Microphone] = None
@@ -47,12 +63,11 @@ class VoiceEngine:
             log.info("STT backend set to typed input mode.")
         else:
             try:
-                self.mic = sr.Microphone()
-
-                # Adjust for ambient noise once at startup
-                with self.mic as source:
-                    log.info("Calibrating microphone for ambient noise...")
-                    self.recognizer.adjust_for_ambient_noise(source, duration=1)
+                devnull, saved = _suppress_stderr()
+                try:
+                    self.mic = sr.Microphone()
+                finally:
+                    _restore_stderr(devnull, saved)
             except Exception as e:
                 log.warning(f"Microphone unavailable. Falling back to typed input mode: {e}")
                 self.backend = "typed"
@@ -111,10 +126,8 @@ class VoiceEngine:
         """Convert text to speech (blocking)."""
         if not text:
             return
-        log.info(f"[JARVIS] → {text}")
-        print('\\n' + '='*70)
-        print(f'🔊 JARVIS [MALE VOICE]: {text}')
-        print('='*70 + '\\n')
+        log.debug(f"[JARVIS] → {text}")  # debug-only: goes to log file, not terminal
+        ui.speak_box(text)
         self.tts_engine.say(text)
         self.tts_engine.runAndWait()
 
@@ -139,17 +152,21 @@ class VoiceEngine:
             None — if recognition fails
         """
         if self.backend == "typed" or self.mic is None:
-            typed = input("⌨️  Type command: ").strip()
+            typed = ui.prompt_command().strip()
             return typed.lower() if typed else None
 
-        print("🎙  Listening...")
+        ui.status("Listening...", "wait")
         try:
-            with self.mic as source:
-                audio = self.recognizer.listen(
-                    source,
-                    timeout=timeout,
-                    phrase_time_limit=phrase_limit
-                )
+            devnull, saved = _suppress_stderr()
+            try:
+                with self.mic as source:
+                    audio = self.recognizer.listen(
+                        source,
+                        timeout=timeout,
+                        phrase_time_limit=phrase_limit
+                    )
+            finally:
+                _restore_stderr(devnull, saved)
 
             # ── Backend selection ──────────────────────────
             backend = self.backend
@@ -169,7 +186,8 @@ class VoiceEngine:
     def _google_recognise(self, audio) -> str | None:
         try:
             text = self.recognizer.recognize_google(audio)
-            print(f"👤 You: {text}")
+            # Show the user's spoken text in a styled box
+            ui.user_box(f"🎙️  {text}")
             return text.lower()
         except sr.UnknownValueError:
             return None

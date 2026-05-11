@@ -5,12 +5,12 @@
   "spotify_client_secret": "GET_FROM_developer.spotify.com",
   "city": "Coimbatore",
   "user_name": "Praneeth",
-  "stt_backend": "typed",
-  "wake_backend": "typed",
-  "tts_rate": 160,
+  "stt_backend": "google",
+  "wake_backend": "porcupine",
+  "tts_rate": 140,
   "tts_volume": 1.0,
   "face_auth_enabled": false,
   "news_country": "in",
   "news_category": "technology",
-  "_comment": "JARVIS Configuration \u2014 fill in your API keys here"
+  "_comment": "JARVIS Configuration — Full Voice Mode Enabled! | stt_backend: google (online) | wake_backend: porcupine (offline)"
 }
