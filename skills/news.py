@@ -151,100 +151,7 @@ class CalendarSkill:
             json.dump(self._events, f, indent=2)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# MUSIC SKILL
-# ══════════════════════════════════════════════════════════════════════════════
 
-
-class MusicSkill:
-    """
-    Spotify playback control via spotipy.
-
-    INSTALL:
-        pip install spotipy
-
-    SETUP:
-        1. Go to developer.spotify.com → Create App
-        2. Set Redirect URI to: http://localhost:8888/callback
-        3. Add client_id, client_secret to config.json
-        4. First run opens browser for Spotify auth
-    """
-
-    triggers = ["play", "music", "song", "pause", "next", "previous",
-                "volume up", "volume down", "playlist", "spotify", "skip"]
-
-    def __init__(self):
-        self._sp = None  # lazy-init to avoid blocking startup
-
-    def _get_sp(self):
-        if self._sp:
-            return self._sp
-        try:
-            import spotipy
-            from spotipy.oauth2 import SpotifyOAuth
-            self._sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-                client_id     = CONFIG.get("spotify_client_id", ""),
-                client_secret = CONFIG.get("spotify_client_secret", ""),
-                redirect_uri  = "http://localhost:8888/callback",
-                scope="user-modify-playback-state user-read-playback-state"
-            ))
-            return self._sp
-        except ImportError:
-            return None
-        except Exception as e:
-            log.error(f"Spotify init error: {e}")
-            return None
-
-    def handle(self, command: str) -> str:
-        if "open spotify" in command or ("spotify" in command and any(w in command for w in ["open", "launch", "start"])):
-            webbrowser.open("https://open.spotify.com/")
-            return "[Music] Opening Spotify in your browser."
-
-        sp = self._get_sp()
-        if not sp:
-            return "[Music] Spotify not configured. Add credentials to config.json."
-
-        try:
-            if "pause" in command or "stop music" in command:
-                sp.pause_playback()
-                return "[Music] Playback paused."
-
-            elif "next" in command or "skip" in command:
-                sp.next_track()
-                return "[Music] Skipped to next track."
-
-            elif "previous" in command or "back" in command:
-                sp.previous_track()
-                return "[Music] Playing previous track."
-
-            elif "resume" in command:
-                sp.start_playback()
-                return "[Music] Playback resumed."
-
-            elif "play" in command:
-                # Extract song/artist name
-                import re
-                song = re.sub(r'\b(play|music|song|on spotify)\b', '', command).strip()
-                if song:
-                    results = sp.search(q=song, limit=1, type="track")
-                    tracks  = results["tracks"]["items"]
-                    if tracks:
-                        uri = tracks[0]["uri"]
-                        sp.start_playback(uris=[uri])
-                        name   = tracks[0]["name"]
-                        artist = tracks[0]["artists"][0]["name"]
-                        return f"[Music] Now playing: {name} by {artist}."
-                    else:
-                        return f"[Music] Could not find '{song}' on Spotify."
-                else:
-                    sp.start_playback()
-                    return "[Music] Resuming playback."
-
-            return "[Music] Command not understood."
-
-        except Exception as e:
-            log.error(f"MusicSkill error: {e}")
-            return f"[Music] Error: {str(e)}"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -258,10 +165,39 @@ class SearchSkill:
     """DuckDuckGo web search — returns snippet, optionally opens browser."""
 
     triggers = ["search", "look up", "google", "find", "what is", "who is",
-                "tell me about", "search for", "browse"]
+                "tell me about", "search for", "browse", "youtube", "on youtube",
+                "play on youtube", "play song on youtube"]
 
     def handle(self, command: str) -> str:
         import re
+        
+        if "youtube" in command:
+            import urllib.request
+            import urllib.parse
+            
+            query = re.sub(r'\b(play|song|search|open|youtube|on youtube|for)\b', '', command).strip()
+            if not query:
+                webbrowser.open("https://www.youtube.com/")
+                return "[Search] Opening YouTube."
+
+            try:
+                # Intelligent shortcut: Resolve first result for instant playback
+                encoded = urllib.parse.quote(query)
+                url = f"https://www.youtube.com/results?search_query={encoded}"
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=4) as response:
+                    html = response.read().decode()
+                video_ids = re.findall(r"watch\?v=(\S{11})", html)
+                if video_ids:
+                    webbrowser.open(f"https://www.youtube.com/watch?v={video_ids[0]}")
+                    return f"[Search] Playing '{query}' on YouTube."
+            except Exception:
+                pass # Graceful fallback to search listing on connection blip
+
+            # Secondary fallback: traditional search page
+            webbrowser.open(f"https://www.youtube.com/results?search_query={query.replace(' ', '+')}")
+            return f"[Search] Searching '{query}' on YouTube."
+
         query = command
         for kw in ["search for", "search", "look up", "google", "find",
                    "tell me about", "what is", "who is"]:
@@ -282,7 +218,10 @@ class SearchSkill:
 
             abstract = data.get("AbstractText", "")
             if abstract:
-                snippet = abstract[:400] + ("..." if len(abstract) > 400 else "")
+                # Trim droning paragraphs down to conversational length
+                snippet = abstract[:220]
+                if len(abstract) > 220:
+                    snippet = snippet.rsplit('.', 1)[0] + '.' if '.' in snippet else snippet.strip() + "..."
                 result  = f"[Search] {snippet}"
             else:
                 # Fall back: open browser
@@ -312,7 +251,7 @@ class SystemSkill:
     """OS-level controls: volume, open apps, shutdown, screenshots."""
 
     triggers = ["volume", "open", "launch", "shutdown", "restart", "screenshot",
-                "battery", "cpu", "ram", "memory", "brightness"]
+                "battery", "cpu", "ram", "memory", "brightness", "terminal", "cmd", "command prompt", "lock", "lock screen"]
 
     def handle(self, command: str) -> str:
         system = platform.system().lower()
@@ -320,10 +259,13 @@ class SystemSkill:
         if "screenshot" in command:
             return self._screenshot()
 
-        elif "volume up" in command:
+        elif "lock" in command:
+            return self._lock_screen(system)
+
+        elif any(w in command for w in ["volume up", "increase volume"]):
             return self._volume(+10, system)
 
-        elif "volume down" in command:
+        elif any(w in command for w in ["volume down", "decrease volume"]):
             return self._volume(-10, system)
 
         elif "mute" in command:
@@ -335,7 +277,10 @@ class SystemSkill:
         elif "restart" in command:
             return self._restart(system)
 
-        elif "open" in command or "launch" in command:
+        elif "brightness" in command:
+            return self._brightness(command, system)
+
+        elif any(w in command for w in ["open", "launch", "terminal", "cmd"]):
             return self._open_app(command)
 
         elif "battery" in command:
@@ -348,13 +293,56 @@ class SystemSkill:
 
     def _screenshot(self) -> str:
         try:
-            import pyautogui
+            import os
+            import shutil
+            os.makedirs("data", exist_ok=True)
             from datetime import datetime
             fname = f"data/screenshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            
+            # Prioritize native Linux backends for stability
+            if platform.system().lower() == "linux":
+                if shutil.which("gnome-screenshot"):
+                    subprocess.run(["gnome-screenshot", "-f", fname], check=False)
+                    if os.path.exists(fname):
+                         return f"[System] Screenshot saved: {fname}"
+                elif shutil.which("scrot"):
+                    subprocess.run(["scrot", fname], check=False)
+                    if os.path.exists(fname):
+                         return f"[System] Screenshot saved: {fname}"
+
+            import pyautogui
             pyautogui.screenshot(fname)
             return f"[System] Screenshot saved: {fname}"
         except Exception as e:
             return f"[System] Screenshot failed: {e}"
+
+    def _lock_screen(self, system: str) -> str:
+        try:
+            if system == "windows":
+                import ctypes
+                ctypes.windll.user32.LockWorkStation()
+            elif system == "linux":
+                # Sequence common locking directives
+                cmds = [
+                    "loginctl lock-session",
+                    "xdg-screensaver lock",
+                    "gnome-screensaver-command -l",
+                    "dbus-send --type=method_call --dest=org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock"
+                ]
+                for c in cmds:
+                    try:
+                        # Run in shell so we can ignore output and errors cleanly
+                        if subprocess.run(c, shell=True, stderr=subprocess.DEVNULL, timeout=2).returncode == 0:
+                            break
+                    except Exception:
+                        continue
+            elif system == "darwin":
+                subprocess.run(["pmset", "displaysleepnow"])
+            
+            return "[System] Machine locked."
+        except Exception as e:
+            return f"[System] Lock failed: {e}"
+
 
     def _volume(self, delta: int, system: str) -> str:
         try:
@@ -400,6 +388,8 @@ class SystemSkill:
                 "git hub": "https://github.com/",
                 "github.com": "https://github.com/",
                 "spotify": "https://open.spotify.com/",
+                "youtube": "https://youtube.com/",
+                "you tube": "https://youtube.com/",
                 "browser": "https://www.google.com/",
                 "chrome browser": "https://www.google.com/",
             }
@@ -408,7 +398,15 @@ class SystemSkill:
                 "chrome": ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"],
                 "google chrome": ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"],
                 "browser": ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"],
+                "terminal": ["gnome-terminal", "x-terminal-emulator", "konsole", "alacritty", "kitty", "xterm"],
+                "cmd": ["gnome-terminal", "x-terminal-emulator", "konsole", "alacritty", "kitty", "xterm"],
+                "command prompt": ["gnome-terminal", "x-terminal-emulator", "konsole", "alacritty", "kitty", "xterm"],
             }
+
+            if system == "windows":
+                app_map["terminal"] = ["wt", "cmd", "powershell"]
+                app_map["cmd"] = ["wt", "cmd", "powershell"]
+                app_map["command prompt"] = ["wt", "cmd", "powershell"]
 
             if target_lower in url_map:
                 webbrowser.open(url_map[target_lower])
@@ -492,3 +490,28 @@ class SystemSkill:
             )
         except Exception:
             return "[System] Stats unavailable."
+
+    def _brightness(self, command: str, system: str) -> str:
+        try:
+            import re
+            match = re.search(r'(\d+)', command)
+            val = int(match.group(1)) if match else 50
+            val = max(0, min(100, val))
+            
+            if system == "linux":
+                # Standard GNOME d-bus method
+                cmd = f'gdbus call --session --dest org.gnome.SettingsDaemon.Power --object-path /org/gnome/SettingsDaemon/Power --method org.freedesktop.DBus.Properties.Set org.gnome.SettingsDaemon.Power.Screen Brightness "<int32 {val}>"'
+                subprocess.run(cmd, shell=True, check=False)
+                return f"[System] Brightness set to {val}%."
+                
+            elif system == "windows":
+                # Attempt through powershell/wmi directly
+                cmd = f'powershell (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1,{val})'
+                subprocess.run(cmd, shell=True, check=False)
+                return f"[System] Brightness set to {val}%."
+
+            return "[System] Brightness control not supported on this OS."
+            
+        except Exception as e:
+            log.error(f"Brightness error: {e}")
+            return f"[System] Could not change brightness: {e}"

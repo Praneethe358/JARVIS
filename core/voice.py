@@ -54,8 +54,8 @@ class VoiceEngine:
         # ── STT setup ──────────────────────────────────────
         self.backend = CONFIG.get("stt_backend", "google")
         self.recognizer = sr.Recognizer()
-        # Tailored setting: Your measured floor is ~6500. Setting 8500 base with dynamic drift ensures crisp responsiveness.
-        self.recognizer.energy_threshold    = 8500
+        # Dynamic seeding: Removed hardcoded high baseline that caused stuck listening. Let dynamic calibration scale automatically.
+        self.recognizer.energy_threshold    = 1000
         self.recognizer.dynamic_energy_threshold = True
         self.recognizer.pause_threshold     = 0.6   # Slightly faster cutoff for immediate transition
 
@@ -91,8 +91,8 @@ class VoiceEngine:
                             raise Exception("Total Hardware Lockdown: No readable audio inputs discovered.")
 
                     with self.mic as source:
-                        # Gentle adjustment cap
-                        self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
+                        # Robust noise footprint scan (increased to 1.2s for stable baseline)
+                        self.recognizer.adjust_for_ambient_noise(source, duration=1.2)
                 finally:
                     _restore_stderr(devnull, saved)
             except Exception as e:
