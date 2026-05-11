@@ -25,6 +25,7 @@ import time
 import os
 import sys
 import threading
+import requests       # used for the Ollama health check on boot
 import core.ui as ui
 from core.voice      import VoiceEngine
 from core.brain      import Brain
@@ -95,7 +96,31 @@ class NEXUS:
 
         # Animated boot sequence
         ui.boot_sequence()
+
+        # ── Ollama health check ───────────────────────────────────────
+        # Ping Ollama on startup; disable reasoning core and warn if unreachable.
+        self._ollama_ok = self._check_ollama()
+        self.brain.ollama_available = self._ollama_ok
+
         log.info("All systems online. NEXUS ready.")
+
+    # ──────────────────────────────────────────────────────
+    def _check_ollama(self) -> bool:
+        """
+        Ping Ollama's base endpoint to verify the service is running.
+        Logs a warning and returns False if unreachable so the rest of
+        the system can degrade gracefully to skill-only mode.
+        """
+        try:
+            resp = requests.get("http://localhost:11434", timeout=3)
+            if resp.status_code == 200:
+                log.info("Ollama health check: ONLINE")
+                return True
+        except Exception:
+            pass
+        log.warning("Ollama health check: UNREACHABLE — reasoning core disabled.")
+        ui.status("Reasoning core (Ollama) is OFFLINE — skill-only mode", "warn")
+        return False
 
     # ──────────────────────────────────────────────────────
     def _show_startup_menu(self):
@@ -113,8 +138,15 @@ class NEXUS:
         
         if is_voice_mode:
             ui.status("VOICE MODE ACTIVE — listening for 'nexus' wake word", "wait")
-        
-        self.voice.speak("NEXUS online. Awaiting your command, Praneeth.")
+
+        # ── Startup announcement ───────────────────────────────────────
+        # Announce full operational status or degraded mode depending on Ollama health.
+        if self._ollama_ok:
+            self.voice.speak("NEXUS online. All systems operational. Reasoning core active.")
+        else:
+            self.voice.speak(
+                "Warning: reasoning core unavailable. Operating in skill-only mode."
+            )
         ui.divider()
         ui.status("NEXUS ACTIVE", "ok")
         ui.divider()

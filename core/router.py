@@ -59,6 +59,18 @@ class CommandRouter:
         if any(phrase in command_lower for phrase in ["nexus sleep", "go to sleep", "sleep mode"]):
             return "__SLEEP__"
 
+        # ── Dynamic model switching ───────────────────────────
+        # Voice command: "switch model to llama3" / "use model mistral"
+        import re as _re
+        _model_match = _re.search(
+            r'(?:switch model to|use model|change model to)\s+([\w:./-]+)',
+            command_lower
+        )
+        if _model_match:
+            new_model = _model_match.group(1).strip()
+            self.brain.switch_model(new_model)          # updates Brain + config.json
+            return f"Switching reasoning model to {new_model}. Ready."
+
         if command_lower in ["time", "what time", "what's the time", "current time"] or any(phrase in command_lower for phrase in ["what is the time", "what's the time", "tell me the time", "current time", "time now", "what time is it", "what time it is"]):
             return f"The current time is {datetime.now().strftime('%I:%M %p')}."
 

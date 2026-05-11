@@ -12,5 +12,6 @@
   "face_auth_enabled": false,
   "news_country": "in",
   "news_category": "technology",
-  "mic_device_index": null
+  "mic_device_index": null,
+  "ollama_model": "llama3"
 }
