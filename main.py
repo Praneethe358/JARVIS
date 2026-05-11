@@ -1,11 +1,23 @@
 """
-╔══════════════════════════════════════════════════════════╗
-║        J.A.R.V.I.S  —  Personal AI Assistant            ║
-║  Just A Rather Very Intelligent System                   ║
-║  Author : Praneeth | Stack : Python 3.11+                ║
-╚══════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════╗
+║                                                                        ║
+║      ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗                        ║
+║      ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝                        ║
+║      ██║███████║██████╔╝██║   ██║██║███████╗                        ║
+║      ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║                        ║
+║      ██║██║  ██║██║  ██║ ╚████╔╝ ██║███████║                        ║
+║      ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝                        ║
+║                                                                        ║
+║           🎯 Personal AI Assistant Platform v2.0                     ║
+║         Just A Rather Very Intelligent System                        ║
+║                                                                        ║
+║         👤 User: Praneeth | 📍 City: Coimbatore                     ║
+║         🔧 Backend: Python 3.12+ | 🎙️  Voice: Deep Male             ║
+║         💾 Storage: Local JSON | 🚀 Mode: Typed I/O                 ║
+║                                                                        ║
+╚════════════════════════════════════════════════════════════════════════╝
 
-ENTRY POINT — run this file to start JARVIS.
+QUICK START — run this file to start JARVIS.
     python main.py
 """
 
@@ -69,8 +81,63 @@ class JARVIS:
         log.info("All systems online. JARVIS ready.")
 
     # ──────────────────────────────────────────────────────
+    def _show_startup_menu(self):
+        """Display interactive startup menu with commands and shortcuts."""
+        menu = """
+╔════════════════════════════════════════════════════════════════════════╗
+║                     📋 COMMAND REFERENCE                               ║
+╠════════════════════════════════════════════════════════════════════════╣
+║                                                                        ║
+║  🎤 VOICE COMMANDS (say after "jarvis"):                              ║
+║  ─────────────────────────────────────────────────────────────────   ║
+║    💬 "who are you"              → Meet JARVIS                         ║
+║    ⏰ "what's the time"          → Get current time                    ║
+║    📅 "what's today's date"     → Get today's date                    ║
+║    🎵 "play music"              → Spotify playback                    ║
+║    🔍 "search [query]"          → Web search via DuckDuckGo           ║
+║    📝 "take a note [text]"      → Save quick note                     ║
+║    🔔 "remind me [task]"        → Set reminder with time              ║
+║    📅 "add schedule [event]"    → Add work schedule item             ║
+║    💡 "help"                    → List all features                   ║
+║                                                                        ║
+║  ⚡ SHORTCUTS (Typed Mode):                                            ║
+║  ─────────────────────────────────────────────────────────────────   ║
+║    wake word     → "jarvis" (in any text)                            ║
+║    type command  → Enter command at prompt                            ║
+║    exit          → "exit" or "goodbye" or "shutdown jarvis"          ║
+║    clear memory  → "clear memory" or "reset brain"                  ║
+║                                                                        ║
+║  📚 SKILL CATEGORIES:                                                 ║
+║  ─────────────────────────────────────────────────────────────────   ║
+║    🌤️  Weather      → "weather", "forecast"                          ║
+║    📰 News          → "news", "headlines", "latest"                  ║
+║    🎼 Music         → "play", "pause", "next", "previous"            ║
+║    🔍 Search        → "search", "look up", "find"                    ║
+║    🖥️  System       → "volume", "open app", "screenshot"             ║
+║    📔 Notes         → "note", "save", "list notes"                   ║
+║    🎓 Study         → "quiz", "explain", "summarize"                 ║
+║    ⏰ Reminders     → "reminder", "schedule", "task"                 ║
+║                                                                        ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+"""
+        print(menu)
+        print("\n" + "="*76)
+        print(f"{'═':^76}")
+        print(f"{'🎯 Press Enter to begin. Say "jarvis" to wake me up.':^76}")
+        print(f"{'═':^76}")
+        print("="*76 + "\n")
+        input("\n>>> Ready? Press Enter to start...")
+
     def run(self):
+        """Main event loop with modern terminal UI."""
+        # Show startup menu with commands
+        self._show_startup_menu()
+        
         self.voice.speak("JARVIS online. Awaiting your command, Praneeth.")
+        print("\n" + "─"*76)
+        print(f"{'🟢 JARVIS ACTIVE':^76}")
+        print("─"*76 + "\n")
 
         while True:
             if self.personal:

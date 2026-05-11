@@ -58,3 +58,7 @@
 13:23:03 [INFO] [JARVIS] → [Reminders] Reminder saved for no specific time: about the maths sums
 13:23:08 [INFO] Listening for wake word...
 13:29:15 [INFO] [PersonalAssistantSkill] Saved reminder #18 (from pending)
+13:40:00 [INFO] Selected TTS voice: gmw/en-us+m3
+13:40:00 [INFO] STT backend set to typed input mode.
+13:40:00 [INFO] VoiceEngine initialised.
+13:40:00 [INFO] [JARVIS] → Testing deep male voice output. This sounds bolder and clearer.

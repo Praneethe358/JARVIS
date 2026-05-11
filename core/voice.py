@@ -65,14 +65,15 @@ class VoiceEngine:
     def _configure_tts(self):
         voices = self.tts_engine.getProperty("voices")
 
-        # Prefer a clearer, female-sounding voice variant on Linux/eSpeak.
+        # Prefer bold, clear, deep male voice variants on Linux/eSpeak.
         preferred_candidates = [
-            "gmw/en-us+f3",
-            "gmw/en-gb-x-rp+f3",
-            "gmw/en-gb+f3",
-            "en-us+f3",
-            "en-gb+f3",
-            "en+f3",
+            "gmw/en-us+m3",       # Deep male voice (bold & clear)
+            "gmw/en-us+m2",       # Medium-deep male voice
+            "gmw/en-gb-x-rp+m3", # British deep male
+            "gmw/en-gb+m3",       # UK deep male
+            "en-us+m3",
+            "en-gb+m3",
+            "en+m3",
         ]
 
         selected_voice = None
@@ -99,8 +100,8 @@ class VoiceEngine:
             except Exception as e:
                 log.warning(f"Could not set preferred voice '{selected_voice}': {e}")
 
-        # Slightly slower rate improves clarity.
-        self.tts_engine.setProperty("rate",   CONFIG.get("tts_rate",   160))  # words/min
+        # Moderate rate for bold, clear voice (faster than female variant)
+        self.tts_engine.setProperty("rate",   CONFIG.get("tts_rate",   140))  # words/min - bolder delivery
         self.tts_engine.setProperty("volume", CONFIG.get("tts_volume", 1.0))
 
     # ──────────────────────────────────────────────────────
@@ -111,7 +112,9 @@ class VoiceEngine:
         if not text:
             return
         log.info(f"[JARVIS] → {text}")
-        print(f"\n🔊 JARVIS: {text}\n")
+        print('\\n' + '='*70)
+        print(f'🔊 JARVIS [MALE VOICE]: {text}')
+        print('='*70 + '\\n')
         self.tts_engine.say(text)
         self.tts_engine.runAndWait()
 
