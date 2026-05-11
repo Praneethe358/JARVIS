@@ -20,6 +20,7 @@ _DEFAULT_CONFIG = {
     "spotify_client_id"    : os.getenv("SPOTIFY_CLIENT_ID", ""),
     "spotify_client_secret": os.getenv("SPOTIFY_CLIENT_SECRET", ""),
     "porcupine_access_key" : os.getenv("PORCUPINE_ACCESS_KEY", ""),
+    "mic_device_index"     : None,         # Set to integer index if default mic fails
     "city"                 : "Coimbatore",
     "user_name"            : "Praneeth",
     "stt_backend"          : "google",     # "google" | "whisper"

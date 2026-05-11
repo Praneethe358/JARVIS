@@ -12,5 +12,5 @@
   "face_auth_enabled": false,
   "news_country": "in",
   "news_category": "technology",
-  "_comment": "JARVIS Configuration — Full Voice Mode Enabled! | stt_backend: google (online) | wake_backend: porcupine (offline)"
+  "mic_device_index": 11
 }

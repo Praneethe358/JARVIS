@@ -94,12 +94,13 @@ class WakeWordDetector:
 
     def _init_sr_backend(self):
         self.recognizer = sr.Recognizer()
-        self.recognizer.energy_threshold = 400
-        self.recognizer.dynamic_energy_threshold = False  # Prevent it from going deaf in noisy environments
+        self.recognizer.energy_threshold = 4000
+        self.recognizer.dynamic_energy_threshold = True
         try:
             devnull, saved = _suppress_stderr()
             try:
-                self.mic = sr.Microphone()
+                idx = CONFIG.get("mic_device_index")
+                self.mic = sr.Microphone(device_index=idx)
             finally:
                 _restore_stderr(devnull, saved)
         except Exception as e:
@@ -147,29 +148,36 @@ class WakeWordDetector:
                     log.info(f"Wake word '{self.keyword}' detected from typed input.")
                     return
             
-        # We use a static energy threshold now, so we skip adjusting for ambient noise
-        # to prevent sudden bursts of noise from causing the threshold to spike.
+        devnull, saved = _suppress_stderr()
+        try:
+            with self.mic as source:
+                self.recognizer.adjust_for_ambient_noise(source, duration=1)
+        finally:
+            _restore_stderr(devnull, saved)
 
         while True:
             try:
+                log.debug("Initiating direct 3.5-second raw capture (bypassing silence logic)...")
                 devnull, saved = _suppress_stderr()
                 try:
                     with self.mic as source:
-                        audio = self.recognizer.listen(
-                            source,
-                            timeout=None,
-                            phrase_time_limit=3
-                        )
+                        # RECORD is foolproof - it ignores energy levels entirely
+                        audio = self.recognizer.record(source, duration=3.5)
                 finally:
                     _restore_stderr(devnull, saved)
+                
+                log.debug("Audio chunk captured. Sending to Google STT...")
                 try:
                     text = self.recognizer.recognize_google(audio).lower()
+                    log.debug(f"STT heard: '{text}'")
                     if self.keyword in text:
                         log.info(f"Wake word '{self.keyword}' detected in: '{text}'")
                         return
                 except sr.UnknownValueError:
+                    log.debug("STT returned UnknownValueError (no speech detected or unintelligible).")
                     pass  # silence or noise — keep listening
-                except sr.RequestError:
+                except sr.RequestError as e:
+                    log.debug(f"STT RequestError: {e}")
                     # Offline fallback: just wait and retry
                     time.sleep(1)
 

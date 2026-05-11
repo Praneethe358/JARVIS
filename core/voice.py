@@ -54,8 +54,9 @@ class VoiceEngine:
         # ── STT setup ──────────────────────────────────────
         self.backend = CONFIG.get("stt_backend", "google")
         self.recognizer = sr.Recognizer()
-        self.recognizer.energy_threshold    = 400   # Set static threshold
-        self.recognizer.dynamic_energy_threshold = False # Prevent ambient noise from breaking mic
+        # Tailored setting: Your measured floor is ~6500. Setting 8500 base with dynamic drift ensures crisp responsiveness.
+        self.recognizer.energy_threshold    = 8500
+        self.recognizer.dynamic_energy_threshold = True
         self.recognizer.pause_threshold     = 0.8   # seconds of silence = end
 
         self.mic: Optional[sr.Microphone] = None
@@ -65,7 +66,10 @@ class VoiceEngine:
             try:
                 devnull, saved = _suppress_stderr()
                 try:
-                    self.mic = sr.Microphone()
+                    idx = CONFIG.get("mic_device_index")
+                    self.mic = sr.Microphone(device_index=idx)
+                    with self.mic as source:
+                        self.recognizer.adjust_for_ambient_noise(source, duration=1)
                 finally:
                     _restore_stderr(devnull, saved)
             except Exception as e:
