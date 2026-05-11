@@ -50,16 +50,23 @@ class Brain:
 
     def __init__(self):
         api_key = CONFIG.get("openai_api_key")
-        if not api_key:
-            raise ValueError(
-                "OPENAI_API_KEY not set in config.json or environment. "
-                "Get your key at https://platform.openai.com/api-keys"
-            )
-        self.client  = OpenAI(api_key=api_key)
-        self.model   = "gpt-4o-mini"
+        self.client = None
+        self.model = "gpt-4o-mini"
         self.history = deque(maxlen=20)  # rolling window: last 20 turns
 
-        log.info(f"Brain (OpenAI {self.model}) initialised.")
+        if api_key:
+            self.client = OpenAI(api_key=api_key)
+            log.info(f"Brain (OpenAI {self.model}) initialised.")
+        else:
+            log.warning("OPENAI_API_KEY not set. Brain running in local fallback mode.")
+
+    def _local_reply(self, user_input: str, context: str = "") -> str:
+        if context:
+            return context
+        return (
+            "OpenAI is not configured yet, Sir. "
+            "I can still run local skills, but conversational replies need an API key."
+        )
 
     # ──────────────────────────────────────────────────────
     def think(self, user_input: str, context: str = "") -> str:
@@ -74,6 +81,9 @@ class Brain:
         Returns:
             str: JARVIS's spoken response
         """
+        if self.client is None:
+            return self._local_reply(user_input, context)
+
         content = user_input
         if context:
             content = f"{user_input}\n\n[Skill context for your response]:\n{context}"
@@ -109,6 +119,9 @@ class Brain:
             topic : concept to explain (e.g. "backpropagation")
             depth : "explain" | "quiz" | "summarise"
         """
+        if self.client is None:
+            return self._local_reply(topic)
+
         prompts = {
             "explain"  : f"Explain '{topic}' clearly with an analogy and a simple example. Target audience: 2nd-year AI student.",
             "quiz"     : f"Give me 3 short quiz questions on '{topic}' with answers. Format: Q: ... A: ...",

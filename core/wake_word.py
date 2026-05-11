@@ -25,15 +25,17 @@ class WakeWordDetector:
 
     def __init__(self, keyword: str = "jarvis"):
         self.keyword   = keyword.lower()
-        self.backend   = CONFIG.get("wake_backend", "sr")  # "porcupine" or "sr"
+        self.backend   = CONFIG.get("wake_backend", "sr")  # "porcupine" | "sr" | "typed"
         self._porcupine = None
         self.recognizer = None
         self.mic = None
 
         if self.backend == "porcupine":
             self._init_porcupine()
-        else:
+        elif self.backend == "sr":
             self._init_sr_backend()
+        else:
+            self.backend = "typed"
 
         log.info(f"WakeWordDetector ready — keyword: '{self.keyword}', backend: {self.backend}")
 
@@ -44,6 +46,8 @@ class WakeWordDetector:
         """Blocks until wake word is detected."""
         if self.backend == "porcupine" and self._porcupine:
             self._listen_porcupine()
+        elif self.backend == "typed":
+            self._listen_typed()
         else:
             self._listen_sr()
 
@@ -142,3 +146,10 @@ class WakeWordDetector:
             except Exception as e:
                 log.error(f"Wake word listener error: {e}")
                 time.sleep(0.5)
+
+    def _listen_typed(self):
+        while True:
+            typed = input("⌨️  Type wake word: ").strip().lower()
+            if self.keyword in typed:
+                log.info(f"Wake word '{self.keyword}' detected from typed input.")
+                return

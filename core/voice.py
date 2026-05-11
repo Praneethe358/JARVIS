@@ -36,21 +36,26 @@ class VoiceEngine:
         self._configure_tts()
 
         # ── STT setup ──────────────────────────────────────
+        self.backend = CONFIG.get("stt_backend", "google")
         self.recognizer = sr.Recognizer()
         self.recognizer.energy_threshold    = 300   # mic sensitivity
         self.recognizer.dynamic_energy_threshold = True
         self.recognizer.pause_threshold     = 0.8   # seconds of silence = end
 
         self.mic: Optional[sr.Microphone] = None
-        try:
-            self.mic = sr.Microphone()
+        if self.backend == "typed":
+            log.info("STT backend set to typed input mode.")
+        else:
+            try:
+                self.mic = sr.Microphone()
 
-            # Adjust for ambient noise once at startup
-            with self.mic as source:
-                log.info("Calibrating microphone for ambient noise...")
-                self.recognizer.adjust_for_ambient_noise(source, duration=1)
-        except Exception as e:
-            log.warning(f"Microphone unavailable. Falling back to typed input mode: {e}")
+                # Adjust for ambient noise once at startup
+                with self.mic as source:
+                    log.info("Calibrating microphone for ambient noise...")
+                    self.recognizer.adjust_for_ambient_noise(source, duration=1)
+            except Exception as e:
+                log.warning(f"Microphone unavailable. Falling back to typed input mode: {e}")
+                self.backend = "typed"
 
         log.info("VoiceEngine initialised.")
 
@@ -60,14 +65,43 @@ class VoiceEngine:
     def _configure_tts(self):
         voices = self.tts_engine.getProperty("voices")
 
-        # Pick a male voice if available (more JARVIS-like)
-        for v in voices:
-            if "male" in v.name.lower() or "david" in v.name.lower():
-                self.tts_engine.setProperty("voice", v.id)
-                break
+        # Prefer a clearer, female-sounding voice variant on Linux/eSpeak.
+        preferred_candidates = [
+            "gmw/en-us+f3",
+            "gmw/en-gb-x-rp+f3",
+            "gmw/en-gb+f3",
+            "en-us+f3",
+            "en-gb+f3",
+            "en+f3",
+        ]
 
-        self.tts_engine.setProperty("rate",   CONFIG.get("tts_rate",   175))  # words/min
-        self.tts_engine.setProperty("volume", CONFIG.get("tts_volume", 0.9))
+        selected_voice = None
+        for candidate in preferred_candidates:
+            try:
+                self.tts_engine.setProperty("voice", candidate)
+                selected_voice = candidate
+                break
+            except Exception:
+                continue
+
+        if selected_voice is None:
+            # Fall back to a standard English voice if the female variant is unavailable.
+            for voice in voices:
+                voice_name = f"{voice.name} {voice.id}".lower()
+                if any(token in voice_name for token in ["english (america)", "english (great britain)", "english (received pronunciation)", "en-us", "en-gb"]):
+                    selected_voice = voice.id
+                    break
+
+        if selected_voice:
+            try:
+                self.tts_engine.setProperty("voice", selected_voice)
+                log.info(f"Selected TTS voice: {selected_voice}")
+            except Exception as e:
+                log.warning(f"Could not set preferred voice '{selected_voice}': {e}")
+
+        # Slightly slower rate improves clarity.
+        self.tts_engine.setProperty("rate",   CONFIG.get("tts_rate",   160))  # words/min
+        self.tts_engine.setProperty("volume", CONFIG.get("tts_volume", 1.0))
 
     # ──────────────────────────────────────────────────────
     # Speak
@@ -101,7 +135,7 @@ class VoiceEngine:
             str  — transcribed command (lowercase)
             None — if recognition fails
         """
-        if self.mic is None:
+        if self.backend == "typed" or self.mic is None:
             typed = input("⌨️  Type command: ").strip()
             return typed.lower() if typed else None
 
@@ -115,7 +149,7 @@ class VoiceEngine:
                 )
 
             # ── Backend selection ──────────────────────────
-            backend = CONFIG.get("stt_backend", "google")
+            backend = self.backend
 
             if backend == "whisper":
                 return self._whisper_recognise(audio)
