@@ -181,7 +181,7 @@ class NEXUS:
 
             # 4. Route and execute (with spinner)
             response = ""
-            with ui.spinner("Thinking"):
+            with ui.spinner("Reasoning — please wait"):
                 response = self.router.handle(command)
 
             # 5. Speak response

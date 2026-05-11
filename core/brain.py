@@ -164,7 +164,8 @@ class Brain:
                 headers={"Content-Type": "application/json"},
                 method="POST",
             )
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            # Timeout: 120s — Mistral on CPU can take 60-90s for long queries
+            with urllib.request.urlopen(req, timeout=120) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 return data.get("response", "").strip()
 
@@ -173,12 +174,13 @@ class Brain:
             log.error(f"Ollama HTTP error: {e.code} {e.reason}")
             return ""
         except urllib.error.URLError as e:
-            # Connection refused, DNS failure, etc.
+            # Connection refused / DNS failure — Ollama is genuinely down
             log.error(f"Ollama connection error: {e.reason}")
-            self.ollama_available = False
+            self.ollama_available = False   # disable until next boot
             return ""
         except TimeoutError:
-            log.error("Ollama request timed out.")
+            # Transient slowness — do NOT disable Ollama, just skip this request
+            log.warning("Ollama request timed out — will retry on next command.")
             return ""
         except Exception as e:
             log.error(f"Ollama query failed: {e}")
