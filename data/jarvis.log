@@ -62,3 +62,84 @@
 13:40:00 [INFO] STT backend set to typed input mode.
 13:40:00 [INFO] VoiceEngine initialised.
 13:40:00 [INFO] [JARVIS] → Testing deep male voice output. This sounds bolder and clearer.
+13:41:00 [INFO] Initialising JARVIS subsystems...
+13:41:00 [INFO] Selected TTS voice: gmw/en-us+m3
+13:41:00 [INFO] STT backend set to typed input mode.
+13:41:00 [INFO] VoiceEngine initialised.
+13:41:00 [INFO] Local Brain initialised.
+13:41:00 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
+13:41:00 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+13:41:00 [INFO] Router loaded with 10 skills.
+13:41:00 [INFO] All systems online. JARVIS ready.
+13:41:06 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+13:41:06 [INFO] Listening for wake word...
+13:41:11 [INFO] Wake word 'jarvis' detected from typed input.
+13:41:11 [INFO] [JARVIS] → Yes?
+13:41:25 [INFO] Command received: weather
+13:41:25 [INFO] Routing to skill: WeatherSkill
+13:41:31 [INFO] [JARVIS] → [Weather] Error: Invalid API key. Please see https://openweathermap.org/faq#error401 for more info.
+13:41:41 [INFO] Listening for wake word...
+13:41:49 [INFO] Wake word 'jarvis' detected from typed input.
+13:41:49 [INFO] [JARVIS] → Yes?
+13:41:56 [INFO] Command received: play song in spotify
+13:41:56 [INFO] Routing to skill: MusicSkill
+13:41:56 [INFO] User authentication requires interaction with your web browser. Once you enter your credentials and give authorization, you will be redirected to a url.  Paste that url you were directed to to complete the authorization.
+13:41:56 [WARNING] Using 'localhost' as a redirect URI is being deprecated. Use a loopback IP address such as 127.0.0.1 to ensure your app remains functional.
+13:41:57 [INFO] Opened https://accounts.spotify.com/authorize?client_id=GET_FROM_developer.spotify.com&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8888%2Fcallback&scope=user-modify-playback-state+user-read-playback-state in your browser
+13:43:32 [INFO] Initialising JARVIS subsystems...
+13:43:32 [INFO] Selected TTS voice: gmw/en-us+m3
+13:43:32 [INFO] STT backend set to typed input mode.
+13:43:32 [INFO] VoiceEngine initialised.
+13:43:32 [INFO] Local Brain initialised.
+13:43:32 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
+13:43:32 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+13:43:32 [INFO] Router loaded with 10 skills.
+13:43:32 [INFO] All systems online. JARVIS ready.
+13:46:19 [INFO] Initialising JARVIS subsystems...
+13:46:19 [INFO] Selected TTS voice: gmw/en-us+m3
+13:46:19 [INFO] STT backend set to typed input mode.
+13:46:19 [INFO] VoiceEngine initialised.
+13:46:19 [INFO] Local Brain initialised.
+13:46:19 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
+13:46:19 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+13:46:19 [INFO] Router loaded with 10 skills.
+13:46:19 [INFO] All systems online. JARVIS ready.
+13:47:23 [INFO] Initialising JARVIS subsystems...
+13:47:23 [INFO] Selected TTS voice: gmw/en-us+m3
+13:47:23 [INFO] STT backend set to typed input mode.
+13:47:23 [INFO] VoiceEngine initialised.
+13:47:23 [INFO] Local Brain initialised.
+13:47:23 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
+13:47:23 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+13:47:23 [INFO] Router loaded with 10 skills.
+13:47:23 [INFO] All systems online. JARVIS ready.
+13:47:27 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+13:47:27 [INFO] Listening for wake word...
+13:50:08 [INFO] Initialising JARVIS subsystems...
+13:50:08 [INFO] Selected TTS voice: gmw/en-us+m3
+13:50:08 [INFO] STT backend set to typed input mode.
+13:50:08 [INFO] VoiceEngine initialised.
+13:50:08 [INFO] Local Brain initialised.
+13:50:08 [INFO] WakeWordDetector ready — keyword: 'jarvis', backend: typed
+13:50:08 [INFO] FaceAuth disabled (set face_auth_enabled=true in config to enable).
+13:50:08 [INFO] Router loaded with 10 skills.
+13:50:08 [INFO] All systems online. JARVIS ready.
+13:50:27 [INFO] [JARVIS] → JARVIS online. Awaiting your command, Praneeth.
+13:50:27 [INFO] Listening for wake word...
+13:50:32 [INFO] Wake word 'jarvis' detected from typed input.
+13:50:32 [INFO] [JARVIS] → Yes?
+13:50:37 [INFO] Command received: whats time now
+13:50:37 [INFO] [JARVIS] → The current time is 01:50 PM.
+13:50:40 [INFO] Listening for wake word...
+13:50:44 [INFO] Wake word 'jarvis' detected from typed input.
+13:50:44 [INFO] [JARVIS] → Yes?
+13:51:13 [INFO] Command received: open sp
+13:51:13 [INFO] Routing to skill: SystemSkill
+13:51:13 [INFO] [JARVIS] → [System] Opening sp.
+13:51:15 [INFO] Listening for wake word...
+13:51:49 [INFO] Wake word 'jarvis' detected from typed input.
+13:51:49 [INFO] [JARVIS] → Yes?
+13:52:00 [INFO] Command received: open spotify play song
+13:52:00 [INFO] Routing to skill: MusicSkill
+13:52:00 [INFO] [JARVIS] → [Music] Opening Spotify in your browser.
+13:52:03 [INFO] Listening for wake word...
