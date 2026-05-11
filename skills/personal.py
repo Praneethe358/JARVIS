@@ -196,7 +196,7 @@ class PersonalAssistantSkill:
         todays_schedule = [s for s in self._schedule if s.get("due_at", "").startswith(today)]
         active_reminders = [r for r in self._reminders if not r.get("done")]
 
-        lines = [f"JARVIS daily plan for {CONFIG.get('user_name', 'Praneeth')}:"]
+        lines = [f"NEXUS daily plan for {CONFIG.get('user_name', 'Praneeth')}:"]
         if todays_schedule:
             lines.append("Today’s schedule:")
             for item in todays_schedule[-5:]:

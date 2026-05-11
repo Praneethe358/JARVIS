@@ -13,7 +13,7 @@ from core.logger import log
 
 class AnalyticsSkill:
     """
-    Logs every JARVIS interaction and generates productivity summaries.
+    Logs every NEXUS interaction and generates productivity summaries.
     """
 
     triggers = ["analytics", "productivity", "how have i been",
@@ -51,7 +51,7 @@ class AnalyticsSkill:
 
     def _summary(self) -> str:
         if not self._log:
-            return "[Analytics] No data yet — start using JARVIS to build your stats."
+            return "[Analytics] No data yet — start using NEXUS to build your stats."
 
         today = datetime.date.today().isoformat()
         today_entries = [e for e in self._log if e["timestamp"].startswith(today)]

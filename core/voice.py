@@ -38,7 +38,7 @@ def _restore_stderr(devnull_fd, saved_fd):
 
 class VoiceEngine:
     """
-    Unified voice interface for JARVIS.
+    Unified voice interface for NEXUS.
 
     Usage:
         engine = VoiceEngine()
@@ -153,7 +153,7 @@ class VoiceEngine:
         """Convert text to speech (blocking)."""
         if not text:
             return
-        log.debug(f"[JARVIS] → {text}")  # debug-only: goes to log file, not terminal
+        log.debug(f"[NEXUS] → {text}")  # debug-only: goes to log file, not terminal
         ui.speak_box(text)
         self.tts_engine.say(text)
         self.tts_engine.runAndWait()
@@ -252,7 +252,7 @@ class VoiceEngine:
 
 # ── ELEVENLABS TTS (optional premium upgrade) ───────────────────────────────
 """
-UPGRADE: Replace pyttsx3 with ElevenLabs for a natural, JARVIS-like voice.
+UPGRADE: Replace pyttsx3 with ElevenLabs for a natural, NEXUS-like voice.
 
 from elevenlabs import generate, play, set_api_key
 set_api_key("YOUR_ELEVENLABS_API_KEY")

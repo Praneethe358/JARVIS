@@ -68,7 +68,7 @@ import os
 os.makedirs("data", exist_ok=True)
 
 # File handler — full verbose log
-_file_handler = logging.FileHandler("data/jarvis.log", mode="a")
+_file_handler = logging.FileHandler("data/nexus.log", mode="a")
 _file_handler.setLevel(logging.DEBUG)
 _file_handler.setFormatter(logging.Formatter(
     "%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"
@@ -94,4 +94,4 @@ logging.basicConfig(
     level=logging.DEBUG,
     handlers=[_file_handler, _console_handler],
 )
-log = logging.getLogger("JARVIS")
+log = logging.getLogger("NEXUS")

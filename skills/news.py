@@ -80,7 +80,7 @@ class CalendarSkill:
         1. Go to console.cloud.google.com
         2. Create project → enable Google Calendar API
         3. Create OAuth credentials → download as credentials.json
-        4. Place credentials.json in the jarvis/ folder
+        4. Place credentials.json in the nexus/ folder
         5. First run: browser opens → authorise access
     """
 

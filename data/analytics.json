@@ -1,0 +1,152 @@
+[
+  {
+    "timestamp": "2026-05-11T19:18:31",
+    "command": "how are you",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:18:42",
+    "command": "open chrome",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:19:37",
+    "command": "jarvis",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:19:59",
+    "command": "show me weather info",
+    "skill": "weather"
+  },
+  {
+    "timestamp": "2026-05-11T19:20:36",
+    "command": "do you like your name",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:21:31",
+    "command": "battery percentage",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:22:04",
+    "command": "cpu usage",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:22:52",
+    "command": "lock screen",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:23:05",
+    "command": "open terminal",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:24:03",
+    "command": "take screenshot",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:26:08",
+    "command": "open chrome",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:27:05",
+    "command": "open spotify",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:27:20",
+    "command": "open youtube",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:27:57",
+    "command": "open google classroom",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:28:43",
+    "command": "what is school",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:28:54",
+    "command": "open terminal",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:29:20",
+    "command": "terminal",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:30:39",
+    "command": "what is snapchat",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:32:13",
+    "command": "wake up buddy",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:32:33",
+    "command": "set brightness",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:42:47",
+    "command": "open chrome",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:43:11",
+    "command": "take screenshot",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-11T19:43:25",
+    "command": "open terminal",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:43:45",
+    "command": "open chrome",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:44:10",
+    "command": "open chachi video",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:44:28",
+    "command": "open chat gpt",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:44:45",
+    "command": "open web whatsapp",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-11T19:47:15",
+    "command": "play believer on youtube",
+    "skill": "music"
+  },
+  {
+    "timestamp": "2026-05-11T19:47:37",
+    "command": "play aaluma doluma song in",
+    "skill": "music"
+  },
+  {
+    "timestamp": "2026-05-11T19:47:51",
+    "command": "play aaluma doluma",
+    "skill": "music"
+  }
+]

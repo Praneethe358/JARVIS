@@ -48,7 +48,7 @@ class CommandRouter:
         command_lower = command.lower().strip()
 
         # ── 1. Special commands ────────────────────────────
-        if any(w in command_lower for w in ["exit", "shutdown jarvis", "goodbye"]):
+        if any(w in command_lower for w in ["exit", "shutdown nexus", "goodbye"]):
             return "Shutting down. Goodbye, Sir."
 
         if "clear memory" in command_lower or "forget everything" in command_lower:

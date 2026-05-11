@@ -1,7 +1,7 @@
 """
 core/wake_word.py
 ─────────────────
-Wake Word Detection — listens passively for "Hey JARVIS".
+Wake Word Detection — listens passively for "Hey NEXUS".
 
 Method A (Recommended — free): Porcupine by Picovoice
     pip install pvporcupine pyaudio
@@ -11,7 +11,7 @@ Method B (Fallback): Keyword spotting via SpeechRecognition
     No API key needed, slightly higher CPU usage.
 
 USAGE:
-    detector = WakeWordDetector(keyword="jarvis")
+    detector = WakeWordDetector(keyword="nexus")
     detector.listen()   # blocks until wake word detected
 """
 
@@ -39,7 +39,7 @@ def _restore_stderr(devnull_fd, saved_fd):
 
 class WakeWordDetector:
 
-    def __init__(self, keyword: str = "jarvis"):
+    def __init__(self, keyword: str = "nexus"):
         self.keyword   = keyword.lower()
         self.backend   = CONFIG.get("wake_backend", "sr")  # "porcupine" | "sr" | "typed"
         self._porcupine = None
@@ -73,7 +73,7 @@ class WakeWordDetector:
     def _init_porcupine(self):
         try:
             import pvporcupine
-            # Built-in keyword: "jarvis"  (available in free tier)
+            # Built-in keyword: "nexus"  (available in free tier)
             access_key = CONFIG.get("porcupine_access_key", "")
             if not access_key:
                 log.warning("No Porcupine access key found in config. Falling back to SpeechRecognition.")
@@ -81,7 +81,7 @@ class WakeWordDetector:
                 self._init_sr_backend()
                 return
 
-            self._porcupine = pvporcupine.create(access_key=access_key, keywords=["jarvis"])
+            self._porcupine = pvporcupine.create(access_key=access_key, keywords=["nexus"])
             log.info("Porcupine wake word engine loaded.")
         except ImportError:
             log.warning("pvporcupine not installed. Falling back to SpeechRecognition.")
@@ -135,7 +135,7 @@ class WakeWordDetector:
             input=True,
             frames_per_buffer=self._porcupine.frame_length
         )
-        log.info("Porcupine stream open — waiting for 'Hey JARVIS'")
+        log.info("Porcupine stream open — waiting for 'Hey NEXUS'")
         try:
             while True:
                 pcm = stream.read(self._porcupine.frame_length, exception_on_overflow=False)

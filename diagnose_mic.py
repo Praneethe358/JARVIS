@@ -5,7 +5,7 @@ import sys
 
 def diagnose():
     print("="*50)
-    print("   JARVIS MICROPHONE DIAGNOSTIC UTILITY   ")
+    print("   NEXUS MICROPHONE DIAGNOSTIC UTILITY   ")
     print("="*50)
     print("\n1. Listing all available microphones detected by OS:")
     

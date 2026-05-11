@@ -1,15 +1,15 @@
 """
 ╔════════════════════════════════════════════════════════════════════════╗
 ║                                                                        ║
-║      ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗                        ║
-║      ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝                        ║
-║      ██║███████║██████╔╝██║   ██║██║███████╗                        ║
-║      ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║                        ║
-║      ██║██║  ██║██║  ██║ ╚████╔╝ ██║███████║                        ║
-║      ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝                        ║
+║    ███╗   ██╗███████╗██╗  ██╗██╗   ██╗███████╗                      ║
+║    ████╗  ██║██╔════╝╚██╗██╔╝██║   ██║██╔════╝                      ║
+║    ██╔██╗ ██║█████╗   ╚███╔╝ ██║   ██║███████╗                      ║
+║    ██║╚██╗██║██╔══╝   ██╔██╗ ██║   ██║╚════██║                      ║
+║    ██║ ╚████║███████╗██╔╝ ██╗╚██████╔╝███████║                      ║
+║    ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝                      ║
 ║                                                                        ║
 ║           🎯 Personal AI Assistant Platform v2.0                     ║
-║         Just A Rather Very Intelligent System                        ║
+║         Neural EXecution & Unified System Automation                 ║
 ║                                                                        ║
 ║         👤 User: Praneeth | 📍 City: Coimbatore                     ║
 ║         🔧 Backend: Python 3.12+ | 🎙️  Voice: Deep Male             ║
@@ -17,7 +17,7 @@
 ║                                                                        ║
 ╚════════════════════════════════════════════════════════════════════════╝
 
-QUICK START — run this file to start JARVIS.
+QUICK START — run this file to start NEXUS.
     python main.py
 """
 
@@ -43,7 +43,7 @@ from skills.study    import StudySkill
 from core.router     import CommandRouter
 from core.logger     import log
 
-class JARVIS:
+class NEXUS:
     """
     Central orchestrator.  Wires together all subsystems.
 
@@ -60,7 +60,7 @@ class JARVIS:
         # Show animated banner first
         ui.banner(animate=True)
 
-        log.info("Initialising JARVIS subsystems...")
+        log.info("Initialising NEXUS subsystems...")
         # Suppress ALSA/JACK noise from PyAudio by redirecting stderr during init
         _devnull = os.open(os.devnull, os.O_WRONLY)
         _old_stderr = os.dup(2)
@@ -69,7 +69,7 @@ class JARVIS:
         # ── Core engines ──────────────────────────────────
         self.voice   = VoiceEngine()
         self.brain   = Brain()
-        self.wake    = WakeWordDetector(keyword="jarvis")
+        self.wake    = WakeWordDetector(keyword="nexus")
         self.face    = FaceAuth()
 
         # ── Skills ────────────────────────────────────────
@@ -95,7 +95,7 @@ class JARVIS:
 
         # Animated boot sequence
         ui.boot_sequence()
-        log.info("All systems online. JARVIS ready.")
+        log.info("All systems online. NEXUS ready.")
 
     # ──────────────────────────────────────────────────────
     def _show_startup_menu(self):
@@ -112,11 +112,11 @@ class JARVIS:
             self._show_startup_menu()
         
         if is_voice_mode:
-            ui.status("VOICE MODE ACTIVE — listening for 'jarvis' wake word", "wait")
+            ui.status("VOICE MODE ACTIVE — listening for 'nexus' wake word", "wait")
         
-        self.voice.speak("JARVIS online. Awaiting your command, Praneeth.")
+        self.voice.speak("NEXUS online. Awaiting your command, Praneeth.")
         ui.divider()
-        ui.status("JARVIS ACTIVE", "ok")
+        ui.status("NEXUS ACTIVE", "ok")
         ui.divider()
 
         _last_reminder_check = 0  # epoch seconds; 0 forces check on first iteration
@@ -155,7 +155,7 @@ class JARVIS:
             # 5. Speak response
             self.voice.speak(response)
 
-            if any(w in command.lower() for w in ["exit", "shutdown jarvis", "goodbye"]):
+            if any(w in command.lower() for w in ["exit", "shutdown nexus", "goodbye"]):
                 log.info("Shutdown command received. Exiting main loop.")
                 ui.shutdown_banner(CONFIG.get("user_name", "Praneeth"))
                 break
@@ -165,5 +165,5 @@ class JARVIS:
 
 
 if __name__ == "__main__":
-    jarvis = JARVIS()
-    jarvis.run()
+    nexus = NEXUS()
+    nexus.run()

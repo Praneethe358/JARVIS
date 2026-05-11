@@ -24,7 +24,7 @@ from core.config import CONFIG
 
 class FaceAuth:
     """
-    Face recognition gate for JARVIS.
+    Face recognition gate for NEXUS.
 
     Modes:
         enabled=True  → webcam face must match enrolled face

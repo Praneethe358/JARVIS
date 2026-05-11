@@ -1,7 +1,7 @@
 """
 core/ui.py
 ──────────
-Premium Terminal UI for JARVIS.
+Premium Terminal UI for NEXUS.
 
 Provides ANSI-styled output helpers:
   - Animated ASCII boot banner
@@ -127,15 +127,15 @@ def _border_row(content: str, color: str, width: int = W, thin: bool = False) ->
     return f"{color}{vl}{RESET}{content}{' ' * pad}{color}{vl}{RESET}"
 
 
-# ── JARVIS ASCII logo ─────────────────────────────────────────────────────────
+# ── NEXUS ASCII logo ─────────────────────────────────────────────────────────
 
 _LOGO_LINES = [
-    r"     ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗",
-    r"     ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝",
-    r"     ██║███████║██████╔╝██║   ██║██║███████╗",
-    r"     ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║",
-    r"     ██║██║  ██║██║  ██║ ╚████╔╝ ██║███████║",
-    r"     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝",
+    r"    ███╗   ██╗███████╗██╗  ██╗██╗   ██╗███████╗",
+    r"    ████╗  ██║██╔════╝╚██╗██╔╝██║   ██║██╔════╝",
+    r"    ██╔██╗ ██║█████╗   ╚███╔╝ ██║   ██║███████╗",
+    r"    ██║╚██╗██║██╔══╝   ██╔██╗ ██║   ██║╚════██║",
+    r"    ██║ ╚████║███████╗██╔╝ ██╗╚██████╔╝███████║",
+    r"    ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝",
 ]
 
 
@@ -143,7 +143,7 @@ _LOGO_LINES = [
 
 def banner(animate: bool = True):
     """
-    Print the full JARVIS boot banner.
+    Print the full NEXUS boot banner.
     If animate=True, each logo line types in with a brief delay.
     """
     _print()
@@ -171,7 +171,7 @@ def banner(animate: bool = True):
 
     # Subtitle lines
     subtitle = [
-        f"  {BOLD}{FG_WHITE}Just A Rather Very Intelligent System{RESET}  ·  v2.0",
+        f"  {BOLD}{FG_WHITE}Neural EXecution & Unified System Automation{RESET}  ·  v2.0",
         f"  {FG_GREY}User: {FG_WHITE}Praneeth{FG_GREY}  │  City: {FG_WHITE}Coimbatore{FG_GREY}  │  Python 3.12+{RESET}",
         f"  {FG_GREY}Backend: {FG_WHITE}Typed I/O{FG_GREY}  │  TTS: {FG_WHITE}Deep Male Voice{FG_GREY}  │  Storage: {FG_WHITE}Local JSON{RESET}",
     ]
@@ -209,7 +209,7 @@ def boot_sequence(steps: list[tuple[str, float]] | None = None):
         _print(f"{BOLD}{FG_GREEN}[ OK ]{RESET}")
 
     _print(f"\n{FG_GREY}  {HL2 * (W - 4)}{RESET}")
-    _print(f"  {BOLD}{FG_GREEN}◈ All systems online{RESET}  {FG_GREY}·  JARVIS ready{RESET}")
+    _print(f"  {BOLD}{FG_GREEN}◈ All systems online{RESET}  {FG_GREY}·  NEXUS ready{RESET}")
     _print(f"{FG_GREY}  {HL2 * (W - 4)}{RESET}\n")
     time.sleep(0.3)
 
@@ -244,14 +244,14 @@ def spinner(label: str = "Processing", color: str = FG_CYAN):
 
 def speak_box(text: str):
     """
-    Premium styled output panel for JARVIS responses.
+    Premium styled output panel for NEXUS responses.
     Uses a double-border cyan box with a labelled header.
     """
     _print()
     now = datetime.datetime.now().strftime("%H:%M:%S")
 
     # Header row
-    label = f" {BOLD}{FG_CYAN}◈ JARVIS{RESET} {FG_GREY}·{RESET} {DIM}{FG_GREY}{now}{RESET} "
+    label = f" {BOLD}{FG_CYAN}◈ NEXUS{RESET} {FG_GREY}·{RESET} {DIM}{FG_GREY}{now}{RESET} "
     import re
     ansi_escape = re.compile(r'\033\[[0-9;]*m')
     label_vis = len(ansi_escape.sub('', label))
@@ -347,7 +347,7 @@ def prompt_wake() -> str:
     Returns the user's input string.
     """
     _print()
-    _write(f"  {FG_CYAN}◈{RESET}  {DIM}{FG_GREY}say or type{RESET} {BOLD}{FG_CYAN}jarvis{RESET}  {FG_GREY}›{RESET}  ")
+    _write(f"  {FG_CYAN}◈{RESET}  {DIM}{FG_GREY}say or type{RESET} {BOLD}{FG_CYAN}nexus{RESET}  {FG_GREY}›{RESET}  ")
     sys.stdout.flush()
     return input()
 
@@ -383,7 +383,7 @@ def startup_menu():
         _print(_border_row("", FG_CYAN))
 
     section("🎤", "VOICE / TYPED COMMANDS", [
-        ('"who are you"',        "Meet JARVIS"),
+        ('"who are you"',        "Meet NEXUS"),
         ('"what time is it"',    "Get current time"),
         ('"today\'s date"',      "Get today\'s date"),
         ('"play music"',         "Spotify playback"),
@@ -396,8 +396,8 @@ def startup_menu():
     _print(_border_mid(FG_CYAN))
 
     section("⚡", "SHORTCUTS", [
-        ("jarvis",               "Wake word (typed or spoken)"),
-        ("exit / goodbye",       "Shutdown JARVIS"),
+        ("nexus",               "Wake word (typed or spoken)"),
+        ("exit / goodbye",       "Shutdown NEXUS"),
         ("clear memory",         "Reset conversation brain"),
     ])
 
@@ -416,7 +416,7 @@ def startup_menu():
 
     _print(f"{FG_CYAN}{BL}{HL * (W - 2)}{BR}{RESET}")
     _print()
-    _write(f"  {FG_GREY}Ready?{RESET}  {FG_CYAN}Press Enter to start JARVIS  ›{RESET}  ")
+    _write(f"  {FG_GREY}Ready?{RESET}  {FG_CYAN}Press Enter to start NEXUS  ›{RESET}  ")
     sys.stdout.flush()
     input()
 
@@ -426,7 +426,7 @@ def shutdown_banner(user_name: str = "Praneeth"):
     _print()
     _print(f"{FG_CYAN}{TL}{HL * (W - 2)}{TR}{RESET}")
     _print(_border_row("", FG_CYAN))
-    msg = f"{BOLD}{FG_WHITE}Goodbye, {user_name}.  JARVIS going offline.{RESET}"
+    msg = f"{BOLD}{FG_WHITE}Goodbye, {user_name}.  NEXUS going offline.{RESET}"
     import re
     ansi_escape = re.compile(r'\033\[[0-9;]*m')
     inner = W - 2

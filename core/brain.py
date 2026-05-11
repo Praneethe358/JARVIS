@@ -1,7 +1,7 @@
 """
 core/brain.py
 ─────────────
-Local-only conversational brain for JARVIS.
+Local-only conversational brain for NEXUS.
 
 This version does not use any external model APIs. It provides:
 - friendly local replies
@@ -47,7 +47,7 @@ _STUDY_BANK = {
 
 
 class Brain:
-    """Conversational local brain for JARVIS."""
+    """Conversational local brain for NEXUS."""
 
     def __init__(self):
         self.history = deque(maxlen=20)
@@ -69,7 +69,7 @@ class Brain:
             )
 
         if any(phrase in text for phrase in ["who are you", "what are you"]):
-            return "I am JARVIS, your local assistant."
+            return "I am NEXUS, your local assistant."
 
         if any(phrase in text for phrase in ["thank you", "thanks"]):
             return "You are welcome, Sir."

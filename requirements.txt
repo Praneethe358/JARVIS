@@ -1,5 +1,5 @@
 # ╔═══════════════════════════════════════════════════════╗
-# ║  JARVIS — requirements.txt                            ║
+# ║  NEXUS — requirements.txt                            ║
 # ║  Install all:  pip install -r requirements.txt        ║
 # ╚═══════════════════════════════════════════════════════╝
 
