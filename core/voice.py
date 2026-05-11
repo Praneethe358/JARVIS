@@ -182,33 +182,33 @@ class VoiceEngine:
             typed = ui.prompt_command().strip()
             return typed.lower() if typed else None
 
-        ui.status("Listening...", "wait")
-        try:
-            devnull, saved = _suppress_stderr()
+        with ui.waveform_listen("Listening"):
             try:
-                with self.mic as source:
-                    audio = self.recognizer.listen(
-                        source,
-                        timeout=timeout,
-                        phrase_time_limit=phrase_limit
-                    )
-            finally:
-                _restore_stderr(devnull, saved)
+                devnull, saved = _suppress_stderr()
+                try:
+                    with self.mic as source:
+                        audio = self.recognizer.listen(
+                            source,
+                            timeout=timeout,
+                            phrase_time_limit=phrase_limit
+                        )
+                finally:
+                    _restore_stderr(devnull, saved)
 
-            # ── Backend selection ──────────────────────────
-            backend = self.backend
+                # ── Backend selection ──────────────────────────
+                backend = self.backend
 
-            if backend == "whisper":
-                return self._whisper_recognise(audio)
-            else:
-                return self._google_recognise(audio)
+                if backend == "whisper":
+                    return self._whisper_recognise(audio)
+                else:
+                    return self._google_recognise(audio)
 
-        except sr.WaitTimeoutError:
-            log.warning("No speech detected within timeout.")
-            return None
-        except Exception as e:
-            log.error(f"listen() error: {e}")
-            return None
+            except sr.WaitTimeoutError:
+                log.warning("No speech detected within timeout.")
+                return None
+            except Exception as e:
+                log.error(f"listen() error: {e}")
+                return None
 
     def _google_recognise(self, audio) -> str | None:
         try:
