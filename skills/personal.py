@@ -27,9 +27,37 @@ class PersonalAssistantSkill:
     def __init__(self):
         self._reminders = self._load_json(self.REMINDERS_FILE)
         self._schedule = self._load_json(self.SCHEDULE_FILE)
+        self._pending_reminder = None  # temp state for multi-step reminder creation
 
     def handle(self, command: str) -> str:
         text = command.lower().strip()
+
+        # If we're waiting for reminder content from the user, attach it
+        if self._pending_reminder:
+            # allow user to cancel
+            if any(w in text for w in ["cancel", "never mind", "stop"]):
+                self._pending_reminder = None
+                return "[Reminders] Pending reminder cancelled."
+
+            # extract the reminder text from follow-up (strip common leading phrases)
+            content = re.sub(r'^(?:.*?remind(?: me)?(?: to| about)?\s*)', '', text, flags=re.IGNORECASE).strip()
+            if not content:
+                return "[Reminders] Tell me what to remind you about."
+
+            due_at = self._pending_reminder.get("due_at")
+            entry = {
+                "id": len(self._reminders) + 1,
+                "text": content,
+                "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+                "due_at": due_at.isoformat(timespec="seconds") if due_at else "",
+                "done": False,
+            }
+            self._reminders.append(entry)
+            self._save_json(self.REMINDERS_FILE, self._reminders)
+            when = due_at.strftime("%Y-%m-%d %H:%M") if due_at else "no specific time"
+            log.info(f"[PersonalAssistantSkill] Saved reminder #{entry['id']} (from pending)")
+            self._pending_reminder = None
+            return f"[Reminders] Reminder saved for {when}: {content}"
 
         if any(phrase in text for phrase in ["what can you do", "help", "features", "faq"]):
             return self._features()
@@ -111,6 +139,10 @@ class PersonalAssistantSkill:
         text = re.sub(r'\s+', ' ', text).strip(' ,.')
 
         if not text:
+            # If user supplied only a time (e.g. 'set reminder at 3pm'), save pending state
+            if due_at:
+                self._pending_reminder = {"due_at": due_at}
+                return "[Reminders] Tell me what to remind you about."
             return "[Reminders] Tell me what to remind you about."
 
         entry = {
