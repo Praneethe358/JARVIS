@@ -54,10 +54,12 @@ class VoiceEngine:
         # ── STT setup ──────────────────────────────────────
         self.backend = CONFIG.get("stt_backend", "google")
         self.recognizer = sr.Recognizer()
-        # Dynamic seeding: Removed hardcoded high baseline that caused stuck listening. Let dynamic calibration scale automatically.
-        self.recognizer.energy_threshold    = 1000
+        # Lower baseline so quiet/normal-volume speech is captured reliably.
+        # Dynamic threshold adjusts automatically to room noise after calibration.
+        self.recognizer.energy_threshold         = 300
         self.recognizer.dynamic_energy_threshold = True
-        self.recognizer.pause_threshold     = 0.6   # Slightly faster cutoff for immediate transition
+        # 0.8 s pause gives the speaker time to finish a word before cutoff
+        self.recognizer.pause_threshold          = 0.8
 
         self.mic: Optional[sr.Microphone] = None
         if self.backend == "typed":
@@ -107,14 +109,17 @@ class VoiceEngine:
     def _configure_tts(self):
         voices = self.tts_engine.getProperty("voices")
 
-        # Prefer bold, clear, deep male voice variants on Linux/eSpeak.
+        # Priority order: clearest, most natural-sounding eSpeak male voices.
+        # en+m7 is warmer and less robotic than m3. Fallback chain covers most systems.
         preferred_candidates = [
-            "gmw/en-us+m3",       # Deep male voice (bold & clear)
-            "gmw/en-us+m2",       # Medium-deep male voice
-            "gmw/en-gb-x-rp+m3", # British deep male
-            "gmw/en-gb+m3",       # UK deep male
+            "gmw/en-us+m7",       # Clear, warm male – best overall on Linux
+            "gmw/en-us+m5",       # Alternative clear male
+            "gmw/en-us+m3",       # Deep male fallback
+            "gmw/en-gb-x-rp+m7", # British clear male
+            "gmw/en-gb+m7",
+            "en-us+m7",
+            "en+m7",
             "en-us+m3",
-            "en-gb+m3",
             "en+m3",
         ]
 
@@ -128,10 +133,13 @@ class VoiceEngine:
                 continue
 
         if selected_voice is None:
-            # Fall back to a standard English voice if the female variant is unavailable.
+            # Fall back to any available English voice
             for voice in voices:
                 voice_name = f"{voice.name} {voice.id}".lower()
-                if any(token in voice_name for token in ["english (america)", "english (great britain)", "english (received pronunciation)", "en-us", "en-gb"]):
+                if any(token in voice_name for token in [
+                    "english (america)", "english (great britain)",
+                    "english (received pronunciation)", "en-us", "en-gb"
+                ]):
                     selected_voice = voice.id
                     break
 
@@ -142,8 +150,14 @@ class VoiceEngine:
             except Exception as e:
                 log.warning(f"Could not set preferred voice '{selected_voice}': {e}")
 
-        # Moderate rate for bold, clear voice (faster than female variant)
-        self.tts_engine.setProperty("rate",   CONFIG.get("tts_rate",   140))  # words/min - bolder delivery
+        # Slightly lower pitch for a warmer, less robotic tone (pyttsx3/espeak only)
+        try:
+            self.tts_engine.setProperty("pitch", CONFIG.get("tts_pitch", 40))
+        except Exception:
+            pass  # not all backends support pitch
+
+        # 155 wpm: clear and deliberate without sounding sluggish
+        self.tts_engine.setProperty("rate",   CONFIG.get("tts_rate",   155))
         self.tts_engine.setProperty("volume", CONFIG.get("tts_volume", 1.0))
 
     # ──────────────────────────────────────────────────────
