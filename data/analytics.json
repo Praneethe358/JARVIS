@@ -198,5 +198,55 @@
     "timestamp": "2026-05-11T21:07:11",
     "command": "open chat",
     "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-12T12:47:05",
+    "command": "open charge",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-12T12:47:33",
+    "command": "nexus",
+    "skill": "brain"
+  },
+  {
+    "timestamp": "2026-05-12T12:47:45",
+    "command": "open github",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-12T12:47:51",
+    "command": "open charging",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-12T12:47:57",
+    "command": "open",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-12T12:48:03",
+    "command": "open chat gbt",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-12T12:48:28",
+    "command": "open spotify",
+    "skill": "system"
+  },
+  {
+    "timestamp": "2026-05-12T12:48:40",
+    "command": "open youtube play believer",
+    "skill": "music"
+  },
+  {
+    "timestamp": "2026-05-12T12:48:50",
+    "command": "open youtube play believer",
+    "skill": "music"
+  },
+  {
+    "timestamp": "2026-05-12T12:48:58",
+    "command": "play believer on youtube",
+    "skill": "music"
   }
 ]

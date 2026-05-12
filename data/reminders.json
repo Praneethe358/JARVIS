@@ -18,7 +18,7 @@
     "text": "add reminder",
     "created_at": "2026-05-11T13:14:31",
     "due_at": "2026-05-12T14:30:00",
-    "done": false
+    "done": true
   },
   {
     "id": 4,
@@ -39,7 +39,7 @@
     "text": "morrow buy groceries",
     "created_at": "2026-05-11T13:15:09",
     "due_at": "2026-05-12T14:30:00",
-    "done": false
+    "done": true
   },
   {
     "id": 7,
@@ -53,7 +53,7 @@
     "text": "morrow buy groceries",
     "created_at": "2026-05-11T13:16:46",
     "due_at": "2026-05-12T14:30:00",
-    "done": false
+    "done": true
   },
   {
     "id": 9,
@@ -67,7 +67,7 @@
     "text": "morrow buy groceries",
     "created_at": "2026-05-11T13:17:54",
     "due_at": "2026-05-12T14:30:00",
-    "done": false
+    "done": true
   },
   {
     "id": 11,
@@ -81,14 +81,14 @@
     "text": "morrow buy groceries",
     "created_at": "2026-05-11T13:19:23",
     "due_at": "2026-05-12T14:30:00",
-    "done": false
+    "done": true
   },
   {
     "id": 13,
     "text": "submit assignment",
     "created_at": "2026-05-11T13:19:23",
     "due_at": "2026-05-12T18:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 14,
@@ -102,14 +102,14 @@
     "text": "buy groceries",
     "created_at": "2026-05-11T13:21:23",
     "due_at": "2026-05-12T14:30:00",
-    "done": false
+    "done": true
   },
   {
     "id": 16,
     "text": "submit assignment",
     "created_at": "2026-05-11T13:21:23",
     "due_at": "2026-05-12T18:00:00",
-    "done": false
+    "done": true
   },
   {
     "id": 17,
@@ -143,6 +143,13 @@
     "id": 21,
     "text": "1 minute",
     "created_at": "2026-05-11T20:56:43",
+    "due_at": "",
+    "done": false
+  },
+  {
+    "id": 22,
+    "text": "can you tell me all the reminders",
+    "created_at": "2026-05-12T12:49:22",
     "due_at": "",
     "done": false
   }

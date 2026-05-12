@@ -27,7 +27,7 @@
 
 **NEXUS** is a modular, voice-driven AI automation framework built natively for Linux. It combines local LLM reasoning via Ollama with a skill-based command router, wake word detection, face authentication, and a real-time TTS/STT voice pipeline — all running fully offline-capable on your own hardware.
 
-Unlike cloud-dependent assistants, NEXUS is designed around **privacy, modularity, and local AI execution**. Every component is independently replaceable, and the Ollama integration means the reasoning core runs entirely on your machine — no API keys, no data leaves your system.
+ NEXUS is designed around **privacy, modularity, and local AI execution**. Every component is independently replaceable, and the Ollama integration means the reasoning core runs entirely on your machine — no API keys, no data leaves your system.
 
 ---
 
