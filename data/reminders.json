@@ -152,5 +152,26 @@
     "created_at": "2026-05-12T12:49:22",
     "due_at": "",
     "done": false
+  },
+  {
+    "id": 23,
+    "text": "set me reminder",
+    "created_at": "2026-05-18T14:17:51",
+    "due_at": "",
+    "done": false
+  },
+  {
+    "id": 24,
+    "text": "reminder",
+    "created_at": "2026-05-18T14:18:00",
+    "due_at": "",
+    "done": false
+  },
+  {
+    "id": 25,
+    "text": "all reminders",
+    "created_at": "2026-05-18T14:18:08",
+    "due_at": "",
+    "done": false
   }
 ]

@@ -44,3 +44,11 @@ python-dotenv>=1.0.0       # load .env for API keys
 
 # ── Stock Market Intelligence ─────────────────────────────────────────────────
 yfinance>=0.2.40           # Yahoo Finance stock quotes (no API key needed, fallback)
+
+# ── Jarvis Voice Pipeline ─────────────────────────────────────────────────────
+edge-tts>=7.0.0            # Microsoft Neural TTS
+sounddevice>=0.4.6         # Fast low-latency audio capture and playback
+numpy>=1.26.0              # Audio buffer processing
+webrtcvad>=2.0.10          # Voice Activity Detection (silence detection)
+requests>=2.31.0           # For NVIDIA Parakeet STT API calls
+pydub>=0.25.1              # For decoding MP3 streams to sounddevice
