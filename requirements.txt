@@ -41,3 +41,6 @@ psutil>=5.9.0
 
 # ── Utilities ────────────────────────────────────────────
 python-dotenv>=1.0.0       # load .env for API keys
+
+# ── Stock Market Intelligence ─────────────────────────────────────────────────
+yfinance>=0.2.40           # Yahoo Finance stock quotes (no API key needed, fallback)

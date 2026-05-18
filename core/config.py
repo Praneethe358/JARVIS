@@ -20,6 +20,9 @@ _DEFAULT_CONFIG = {
     "spotify_client_id"    : os.getenv("SPOTIFY_CLIENT_ID", ""),
     "spotify_client_secret": os.getenv("SPOTIFY_CLIENT_SECRET", ""),
     "porcupine_access_key" : os.getenv("PORCUPINE_ACCESS_KEY", ""),
+    "openrouter_api_key"   : os.getenv("OPENROUTER_API_KEY", ""),
+    "alpha_vantage_api_key": os.getenv("ALPHA_VANTAGE_API_KEY", ""),
+    "finnhub_api_key"      : os.getenv("FINNHUB_API_KEY", ""),
     "mic_device_index"     : None,         # Set to integer index if default mic fails
     "city"                 : "Coimbatore",
     "user_name"            : "Praneeth",
@@ -30,13 +33,20 @@ _DEFAULT_CONFIG = {
     "face_auth_enabled"    : False,
     "news_country"         : "in",
     "news_category"        : "technology",
+    "openrouter_model"     : "deepseek/deepseek-r1:free",
+    "openrouter_fallback_model": "meta-llama/llama-4-scout:free",
+    "stock_cache_ttl_seconds": 300,
+    "watchlist_poll_interval_seconds": 60,
 }
 
 _ENV_OVERRIDES = {
-    "openweather_api_key": "OPENWEATHER_API_KEY",
-    "newsapi_key": "NEWSAPI_KEY",
-    "spotify_client_id": "SPOTIFY_CLIENT_ID",
+    "openweather_api_key"  : "OPENWEATHER_API_KEY",
+    "newsapi_key"          : "NEWSAPI_KEY",
+    "spotify_client_id"    : "SPOTIFY_CLIENT_ID",
     "spotify_client_secret": "SPOTIFY_CLIENT_SECRET",
+    "openrouter_api_key"   : "OPENROUTER_API_KEY",
+    "alpha_vantage_api_key": "ALPHA_VANTAGE_API_KEY",
+    "finnhub_api_key"      : "FINNHUB_API_KEY",
 }
 
 def _load_config() -> dict:

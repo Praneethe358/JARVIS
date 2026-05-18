@@ -3,25 +3,28 @@ core/brain.py
 ─────────────
 Reasoning core for NEXUS.
 
-Primary path  : Ollama (http://127.0.0.1:11434/api/generate) — mistral model
-                Uses 127.0.0.1 explicitly; 'localhost' resolves to IPv6 on
-                this system but Ollama only binds to IPv4.
-Fallback path : Local keyword replies when Ollama is unreachable.
+Primary path  : OpenRouter API (https://openrouter.ai/api/v1/chat/completions)
+                Default model : deepseek/deepseek-r1:free
+                Fallback model: meta-llama/llama-4-scout:free
+                Auth          : Bearer token via OPENROUTER_API_KEY in .env
 
 Conversation history : last 6 messages (3 exchanges) kept in-memory.
-System prompt        : injected into every Ollama call for consistent persona.
+System prompt        : injected as a system role message into every call.
 Response sanitizer   : strips markdown before passing text to TTS engine.
+
+Migration note: Previously used Ollama (http://127.0.0.1:11434/api/generate).
+                Fully replaced with OpenRouter's OpenAI-compatible v1 endpoint.
 """
 
 import re
 import json
+import time
 import urllib.request
 import urllib.error
 from collections import deque
 from core.logger import log
 
 # ── NEXUS system prompt ────────────────────────────────────────────────────────
-# Injected at the top of every Ollama prompt to enforce persona & TTS-safe style.
 _SYSTEM_PROMPT = (
     "You are NEXUS, a Linux-native AI automation framework and personal assistant. "
     "Respond concisely and conversationally — your replies will be spoken aloud via "
@@ -30,18 +33,24 @@ _SYSTEM_PROMPT = (
     "Be sharp, intelligent, and direct."
 )
 
-# ── Ollama endpoints ───────────────────────────────────────────────────────────
-# IMPORTANT: Use 127.0.0.1, NOT 'localhost'.
-# On this system, 'localhost' resolves to IPv6 (::1) but Ollama only binds
-# to IPv4 (127.0.0.1:11434), causing spurious "Not Found" / URLError failures.
-_OLLAMA_GENERATE = "http://127.0.0.1:11434/api/generate"
+# ── OpenRouter endpoint ────────────────────────────────────────────────────────
+_OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions"
+_OPENROUTER_REFERER = "https://your-nexus-app.com"
+_OPENROUTER_TITLE   = "Nexus Dashboard"
+
+# ── Response cache (keyed by prompt hash) ─────────────────────────────────────
+_response_cache: dict = {}   # { hash: {"response": str, "ts": float} }
+_CACHE_TTL = 300             # 5 minutes
 
 
 def sanitize_for_tts(text: str) -> str:
     """
     Strip all markdown symbols before text reaches the TTS engine.
     Removes: **, *, #, `, -, ~, > and collapses whitespace.
+    Also handles <think>...</think> blocks that DeepSeek-R1 emits.
     """
+    # Strip DeepSeek <think> reasoning blocks
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
     text = re.sub(r"\*+", "", text)           # bold/italic
     text = re.sub(r"#+\s*", "", text)         # headings
     text = re.sub(r"`+", "", text)            # code
@@ -52,17 +61,34 @@ def sanitize_for_tts(text: str) -> str:
     return text.strip()
 
 
+def _cache_get(key: str) -> str | None:
+    """Return cached response if still within TTL, else None."""
+    entry = _response_cache.get(key)
+    if entry and (time.time() - entry["ts"]) < _CACHE_TTL:
+        return entry["response"]
+    return None
+
+
+def _cache_set(key: str, response: str):
+    """Store response in cache with current timestamp."""
+    _response_cache[key] = {"response": response, "ts": time.time()}
+
+
 class Brain:
-    """Reasoning core — Ollama primary, local keyword fallback."""
+    """Reasoning core — OpenRouter primary, local keyword fallback."""
 
     def __init__(self):
         # Short-term conversation history: last 6 messages (3 exchanges)
         self.history: deque = deque(maxlen=6)
-        # Active Ollama model — read from config, default to mistral
+        # Active OpenRouter model — read from config
         from core.config import CONFIG
-        self._model: str = CONFIG.get("ollama_model", "mistral")
-        # Flag set on boot by the Ollama health check in main.py
-        self.ollama_available: bool = True
+        self._model: str = CONFIG.get("openrouter_model", "deepseek/deepseek-r1:free")
+        self._fallback_model: str = CONFIG.get(
+            "openrouter_fallback_model", "meta-llama/llama-4-scout:free"
+        )
+        self._api_key: str = CONFIG.get("openrouter_api_key", "")
+        # Flag set on boot by the OpenRouter health check in main.py
+        self.openrouter_available: bool = True
         log.info(f"Brain initialised — model: {self._model}")
 
     # ── Public API ─────────────────────────────────────────────────────────────
@@ -71,7 +97,7 @@ class Brain:
         """
         Main reasoning entry point called by the router.
         If a skill provided context, return it directly.
-        Otherwise, call Ollama with full conversation history.
+        Otherwise, call OpenRouter with full conversation history.
         """
         # Skill produced a concrete result — pass it through unchanged
         if context:
@@ -79,9 +105,9 @@ class Brain:
             self.history.append({"role": "assistant",  "content": context})
             return context
 
-        # Try Ollama reasoning
-        if self.ollama_available:
-            response = self._ollama_query(user_input)
+        # Try OpenRouter reasoning
+        if self.openrouter_available:
+            response = self._openrouter_query(user_input)
             if response:
                 clean = sanitize_for_tts(response)
                 self.history.append({"role": "user",      "content": user_input})
@@ -89,39 +115,68 @@ class Brain:
                 return clean
 
         # Graceful fallback: local keyword replies
-        log.warning("Ollama unavailable — using local keyword fallback.")
+        log.warning("OpenRouter unavailable — using local keyword fallback.")
         reply = self._local_reply(user_input)
         self.history.append({"role": "user",      "content": user_input})
         self.history.append({"role": "assistant",  "content": reply})
         return reply
 
-    def ask_ollama(self, prompt: str) -> str:
+    def ask_ai(self, prompt: str, system_prompt: str = None, use_cache: bool = True) -> str:
         """
-        Direct Ollama call — used by StudySkill and others that want a raw
-        LLM response without touching conversation history.
+        Direct OpenRouter call — used by skills (StudySkill, StockAnalyst, etc.)
+        that want a raw LLM response without touching conversation history.
+
+        Args:
+            prompt       : The user/task prompt to send.
+            system_prompt: Optional custom system prompt (overrides default).
+            use_cache    : If True, cache the response for 5 minutes.
+
         Returns sanitized text, or empty string on failure.
         """
-        if not self.ollama_available:
+        if not self.openrouter_available:
             return ""
-        result = self._ollama_query(prompt)
-        return sanitize_for_tts(result) if result else ""
+
+        # Cache lookup
+        if use_cache:
+            cache_key = str(hash((system_prompt or _SYSTEM_PROMPT, prompt)))
+            cached = _cache_get(cache_key)
+            if cached:
+                log.info("Brain.ask_ai: returning cached response")
+                return cached
+
+        result = self._openrouter_query(
+            prompt,
+            system_override=system_prompt,
+            include_history=False   # direct calls are stateless
+        )
+        clean = sanitize_for_tts(result) if result else ""
+
+        if clean and use_cache:
+            _cache_set(cache_key, clean)
+
+        return clean
+
+    # Backwards-compatible alias (StudySkill used ask_ollama before migration)
+    def ask_ollama(self, prompt: str) -> str:
+        """Legacy alias → ask_ai(). Kept so old skill code doesn't break."""
+        return self.ask_ai(prompt)
 
     def switch_model(self, model_name: str):
         """
-        Update the active Ollama model at runtime and persist to config.json.
+        Update the active OpenRouter model at runtime and persist to config.json.
         Called by the router when the user says 'switch model to [name]'.
         """
         self._model = model_name
-        log.info(f"Ollama model switched to: {model_name}")
+        log.info(f"OpenRouter model switched to: {model_name}")
 
         # Persist the new model name to config.json so it survives restarts
         try:
             with open("config.json", "r") as f:
                 cfg = json.load(f)
-            cfg["ollama_model"] = model_name
+            cfg["openrouter_model"] = model_name
             with open("config.json", "w") as f:
                 json.dump(cfg, f, indent=2)
-            log.info("ollama_model persisted to config.json")
+            log.info("openrouter_model persisted to config.json")
         except Exception as e:
             log.warning(f"Could not persist model to config.json: {e}")
 
@@ -132,63 +187,88 @@ class Brain:
 
     # ── Private helpers ────────────────────────────────────────────────────────
 
-    def _ollama_query(self, user_input: str) -> str:
+    def _openrouter_query(
+        self,
+        user_input: str,
+        system_override: str = None,
+        include_history: bool = True,
+    ) -> str:
         """
-        POST to Ollama /api/generate using urllib.request (NOT requests lib).
+        POST to OpenRouter /v1/chat/completions using urllib.request.
 
-        Why urllib: the 'requests' library silently routes 127.0.0.1 traffic
-        through a system proxy on this machine, returning 404. urllib hits the
-        TCP socket directly, bypassing any proxy layer.
+        Why urllib: consistent with the rest of the codebase and avoids any
+        proxy interference that affected the old Ollama integration.
 
-        Conversation history + system prompt are serialised into a single
-        formatted prompt string so context carries across turns.
+        OpenRouter uses the OpenAI-compatible messages array format:
+          [{"role": "system", ...}, {"role": "user", ...}, ...]
         """
-        # ── Build prompt: system + rolling history + current message ─────────
-        prompt_parts = [f"[SYSTEM] {_SYSTEM_PROMPT}\n"]
-        for msg in self.history:   # last 6 messages (3 exchanges)
-            role = "User" if msg["role"] == "user" else "NEXUS"
-            prompt_parts.append(f"{role}: {msg['content']}")
-        prompt_parts.append(f"User: {user_input}")
-        prompt_parts.append("NEXUS:")   # instruct the model to continue here
-        full_prompt = "\n".join(prompt_parts)
+        if not self._api_key:
+            log.error("OPENROUTER_API_KEY is not set. Check your .env file.")
+            self.openrouter_available = False
+            return ""
 
-        payload = json.dumps(
-            {"model": self._model, "prompt": full_prompt, "stream": False}
-        ).encode("utf-8")
+        system_msg = system_override or _SYSTEM_PROMPT
 
-        # ── POST via urllib — direct socket, no proxy ────────────────────────
+        # ── Build messages array ─────────────────────────────────────────────
+        messages = [{"role": "system", "content": system_msg}]
+
+        if include_history:
+            for msg in self.history:     # last 6 messages (3 exchanges)
+                messages.append({"role": msg["role"], "content": msg["content"]})
+
+        messages.append({"role": "user", "content": user_input})
+
+        payload = json.dumps({
+            "model": self._model,
+            "messages": messages,
+            "max_tokens": 512,
+            "temperature": 0.7,
+        }).encode("utf-8")
+
+        # ── POST via urllib ──────────────────────────────────────────────────
         try:
             req = urllib.request.Request(
-                _OLLAMA_GENERATE,
+                _OPENROUTER_URL,
                 data=payload,
-                headers={"Content-Type": "application/json"},
+                headers={
+                    "Authorization"  : f"Bearer {self._api_key}",
+                    "Content-Type"   : "application/json",
+                    "HTTP-Referer"   : _OPENROUTER_REFERER,
+                    "X-Title"        : _OPENROUTER_TITLE,
+                },
                 method="POST",
             )
-            # Timeout: 120s — Mistral on CPU can take 60-90s for long queries
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            # Timeout: 30s — OpenRouter is cloud-based, fast
+            with urllib.request.urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
-                return data.get("response", "").strip()
+                # OpenAI-compatible response format
+                choices = data.get("choices", [])
+                if not choices:
+                    log.warning(f"OpenRouter returned empty choices: {data}")
+                    return ""
+                return choices[0].get("message", {}).get("content", "").strip()
 
         except urllib.error.HTTPError as e:
-            # Server responded with an HTTP error code (4xx/5xx)
-            log.error(f"Ollama HTTP error: {e.code} {e.reason}")
+            body = e.read().decode("utf-8", errors="ignore")
+            log.error(f"OpenRouter HTTP error: {e.code} {e.reason} — {body[:200]}")
+            # 429 = rate limit, 402 = quota — don't disable permanently
+            if e.code not in (429, 402):
+                self.openrouter_available = False
             return ""
         except urllib.error.URLError as e:
-            # Connection refused / DNS failure — Ollama is genuinely down
-            log.error(f"Ollama connection error: {e.reason}")
-            self.ollama_available = False   # disable until next boot
+            log.error(f"OpenRouter connection error: {e.reason}")
+            self.openrouter_available = False
             return ""
         except TimeoutError:
-            # Transient slowness — do NOT disable Ollama, just skip this request
-            log.warning("Ollama request timed out — will retry on next command.")
+            log.warning("OpenRouter request timed out — will retry on next command.")
             return ""
         except Exception as e:
-            log.error(f"Ollama query failed: {e}")
+            log.error(f"OpenRouter query failed: {e}")
             return ""
 
     def _local_reply(self, user_input: str) -> str:
         """
-        Minimal keyword-based fallback — only used when Ollama is offline.
+        Minimal keyword-based fallback — only used when OpenRouter is offline.
         """
         text = user_input.lower().strip()
 

@@ -205,7 +205,7 @@ def banner(animate: bool = True):
     _print(_row("", NEON_CYAN))
     _print(_row(_info_row("◉", "User   ", "Praneeth          "), NEON_CYAN))
     _print(_row(_info_row("◉", "City   ", "Coimbatore        "), NEON_CYAN))
-    _print(_row(_info_row("◉", "Engine ", "Mistral via Ollama"), NEON_CYAN))
+    _print(_row(_info_row("◉", "Engine ", "DeepSeek-R1 via OpenRouter"), NEON_CYAN))
     _print(_row(_info_row("◉", "Voice  ", "Deep Male · 175WPM"), NEON_CYAN))
     _print(_row("", NEON_CYAN))
 
@@ -225,8 +225,9 @@ def boot_sequence(steps: list | None = None):
             ("Wake Word Detector  ", 0.20),
             ("Face Auth Module    ", 0.15),
             ("Skills Registry     ", 0.25),
-            ("Ollama LLM Interface", 0.30),
+            ("OpenRouter AI       ", 0.30),
             ("Command Router      ", 0.15),
+            ("Stock Market Module ", 0.20),
         ]
 
     _print()
@@ -457,14 +458,14 @@ def startup_menu():
         ('"nexus sleep"',         "Sleep mode — pauses all listening"),
         ('"nexus wake up"',       "Resume from sleep"),
         ('"clear memory"',        "Reset LLM conversation context"),
-        ('"switch model to X"',   "Hot-swap Ollama model at runtime"),
+        ('"switch model to X"',   "Hot-swap OpenRouter model at runtime"),
         ('"shutdown nexus"',      "Graceful shutdown"),
     ], col=NEON_BLUE)
 
     _print(_mid(NEON_CYAN))
 
-    section("🧠", "LLM CAPABILITIES (Mistral)", [
-        ("Any question",          "Open-ended reasoning via Ollama"),
+    section("🧠", "LLM CAPABILITIES (DeepSeek-R1 via OpenRouter)", [
+        ("Any question",          "Open-ended reasoning via OpenRouter"),
         ("Follow-up questions",   "3-exchange context memory"),
         ("Code concepts",         "Explain any programming topic"),
         ("Writing / drafting",    "Emails, summaries, decisions"),
@@ -501,4 +502,294 @@ def shutdown_banner(user_name: str = "Praneeth"):
 
     _print(_row("", NEON_MAGENTA))
     _print(f"{NEON_MAGENTA}{BL}{HL * (W - 2)}{BR}{RESET}")
+    _print()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ██ STOCK MARKET INTELLIGENCE PANELS ██████████████████████████████████████████
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+def _pnl_color(value: float | None) -> str:
+    """Return neon green for positive, neon red for negative, grey for zero/None."""
+    if value is None:
+        return MID_GREY
+    return NEON_GREEN if value >= 0 else NEON_RED
+
+
+def _sentiment_badge(sentiment: str) -> str:
+    """Colored inline sentiment tag."""
+    s = sentiment.upper()
+    if s == "BULLISH":
+        return f"{BOLD}{_rgb(0,0,0)}{_rgb_bg(0,255,136)}  BULL {RESET}"
+    if s == "BEARISH":
+        return f"{BOLD}{_rgb(255,255,255)}{_rgb_bg(255,30,60)}  BEAR {RESET}"
+    return f"{DIM}{_rgb(0,0,0)}{_rgb_bg(100,115,135)}  NEUT {RESET}"
+
+
+def stock_quote_card(quote: dict):
+    """
+    Bloomberg-style single stock quote tile.
+    Shows: ticker, name, price, day change, high/low, volume, data source.
+    """
+    _print()
+    ticker   = quote.get("ticker", "???")
+    name     = quote.get("name", ticker)[:22]
+    price    = quote.get("price")
+    change   = quote.get("change", 0) or 0
+    chg_pct  = quote.get("change_pct", 0) or 0
+    high     = quote.get("high")
+    low      = quote.get("low")
+    volume   = quote.get("volume", 0) or 0
+    currency = quote.get("currency", "")
+    source   = quote.get("source", "cached" if quote.get("cached") else "live")
+    cached   = quote.get("cached", False)
+    error    = quote.get("error")
+
+    # ── Price direction arrows ─────────────────────────────────────────────────
+    arrow       = "▲" if change >= 0 else "▼"
+    price_col   = _pnl_color(change)
+    cached_tag  = f"  {DIM}{MID_GREY}[cached]{RESET}" if cached else ""
+    now         = datetime.datetime.now().strftime("%H:%M:%S")
+
+    # ── Header ────────────────────────────────────────────────────────────────
+    chip = (
+        f" {BOLD}{NEON_CYAN}📈 {ticker}{RESET}  "
+        f"{DIM}{DEEP_GREY}{name}{RESET}  "
+        f"{DEEP_GREY}{DOT}{RESET}  "
+        f"{DIM}{MID_GREY}{now}{RESET} "
+    )
+    chip_v = _vis_len(chip)
+    rfill  = W - 2 - chip_v
+    _print(f"{NEON_CYAN}{TL}{RESET}{chip}{SOFT_CYAN}{HL * max(0, rfill)}{TR}{RESET}")
+
+    if error and price is None:
+        _print(_row(f"  {NEON_RED}⚠  {error}{RESET}", NEON_CYAN))
+        _print(f"{SOFT_CYAN}{BL}{HL * (W - 2)}{BR}{RESET}")
+        _print()
+        return
+
+    # ── Price row ─────────────────────────────────────────────────────────────
+    price_str  = f"{price:,.2f} {currency}" if price is not None else "N/A"
+    change_str = f"{arrow} {change:+.2f} ({chg_pct:+.2f}%)"
+    price_line = (
+        f"  {BOLD}{_rgb(220,240,255)}{price_str:<20}{RESET}"
+        f"  {BOLD}{price_col}{change_str}{RESET}{cached_tag}"
+    )
+    _print(_row(price_line, NEON_CYAN))
+
+    # ── High/Low/Volume row ───────────────────────────────────────────────────
+    hl_line = (
+        f"  {DEEP_GREY}H{RESET} {NEON_GREEN}{high or 'N/A':<10}{RESET}  "
+        f"{DEEP_GREY}L{RESET} {NEON_RED}{low or 'N/A':<10}{RESET}  "
+        f"{DEEP_GREY}Vol{RESET} {MID_GREY}{volume:,}{RESET}  "
+        f"{DEEP_GREY}src:{RESET} {DIM}{MID_GREY}{source}{RESET}"
+    )
+    _print(_row(hl_line, NEON_CYAN))
+    _print(f"{SOFT_CYAN}{BL}{HL * (W - 2)}{BR}{RESET}")
+    _print()
+
+
+def stock_portfolio_panel(summary: dict):
+    """
+    Full portfolio panel — Bloomberg terminal style.
+    Shows each holding with buy price, current price, P&L columns.
+    """
+    _print()
+    now = datetime.datetime.now().strftime("%H:%M:%S")
+
+    # ── Header ────────────────────────────────────────────────────────────────
+    chip = (
+        f" {BOLD}{NEON_CYAN}💼 PORTFOLIO{RESET}  "
+        f"{DEEP_GREY}{DOT}{RESET}  {DIM}{MID_GREY}{now}{RESET} "
+    )
+    chip_v = _vis_len(chip)
+    rfill  = W - 2 - chip_v
+    _print(f"{NEON_CYAN}{TL}{RESET}{chip}{SOFT_CYAN}{HL * max(0, rfill)}{TR}{RESET}")
+    _print(_row("", NEON_CYAN))
+
+    # ── Column headers ────────────────────────────────────────────────────────
+    hdr = (
+        f"  {BOLD}{NEON_WHITE}"
+        f"{'TICKER':<12}{'QTY':>6}  {'BUY':>10}  {'NOW':>10}  "
+        f"{'CHG%':>7}  {'P&L':>10}  {'VALUE':>12}{RESET}"
+    )
+    _print(_row(hdr, NEON_CYAN))
+    _print(_row(f"  {DEEP_GREY}{HL2 * (W - 6)}{RESET}", NEON_CYAN))
+
+    # ── Holdings rows ─────────────────────────────────────────────────────────
+    for h in summary["holdings"]:
+        pnl_col   = _pnl_color(h.get("pnl"))
+        arrow     = "▲" if (h.get("pnl") or 0) >= 0 else "▼"
+        cached    = f"{DIM}~{RESET}" if h.get("cached") else " "
+
+        ticker_s   = f"{BOLD}{NEON_WHITE}{h['ticker']:<11}{RESET}{cached}"
+        qty_s      = f"{MID_GREY}{h['qty']:>6.0f}{RESET}"
+        buy_s      = f"{DEEP_GREY}{h['buy_price']:>10.2f}{RESET}"
+        now_s      = (
+            f"{BOLD}{_rgb(220,240,255)}{h['current_price']:>10.2f}{RESET}"
+            if h.get("current_price") else f"{MID_GREY}{'N/A':>10}{RESET}"
+        )
+        chg_s      = (
+            f"{pnl_col}{h['change_pct']:>6.2f}%{RESET}"
+            if h.get("change_pct") is not None else f"{MID_GREY}{'N/A':>7}{RESET}"
+        )
+        pnl_s      = (
+            f"{BOLD}{pnl_col}{arrow}{h['pnl']:>9.0f}{RESET}"
+            if h.get("pnl") is not None else f"{MID_GREY}{'N/A':>10}{RESET}"
+        )
+        val_s      = (
+            f"{BOLD}{_rgb(220,240,255)}{h['value']:>12.0f}{RESET}"
+            if h.get("value") else f"{MID_GREY}{'N/A':>12}{RESET}"
+        )
+
+        row_content = f"  {ticker_s}  {qty_s}  {buy_s}  {now_s}  {chg_s}  {pnl_s}  {val_s}"
+        _print(_row(row_content, NEON_CYAN))
+
+    # ── Totals footer ─────────────────────────────────────────────────────────
+    _print(_row(f"  {NEON_CYAN}{HL2 * (W - 6)}{RESET}", NEON_CYAN))
+    tot_pnl     = summary["total_pnl"]
+    tot_col     = _pnl_color(tot_pnl)
+    tot_arrow   = "▲" if tot_pnl >= 0 else "▼"
+    totals = (
+        f"  {BOLD}{NEON_WHITE}{'TOTAL':<11}{RESET}  "
+        f"{'':>6}  {'':>10}  "
+        f"{BOLD}{_rgb(220,240,255)}{summary['total_current']:>10.0f}{RESET}  "
+        f"{'':>7}  "
+        f"{BOLD}{tot_col}{tot_arrow}{summary['total_pnl']:>9.0f}{RESET}  "
+        f"{BOLD}{_rgb(220,240,255)}{summary['total_current']:>12.0f}{RESET}"
+    )
+    _print(_row(totals, NEON_CYAN))
+    _print(_row("", NEON_CYAN))
+
+    # ── P&L summary line ──────────────────────────────────────────────────────
+    pnl_pct = summary.get("total_pnl_pct", 0)
+    pnl_summary = (
+        f"  {DEEP_GREY}Invested:{RESET} {_rgb(220,240,255)}{summary['total_invested']:.0f}{RESET}  "
+        f"{DEEP_GREY}Current:{RESET} {_rgb(220,240,255)}{summary['total_current']:.0f}{RESET}  "
+        f"{DEEP_GREY}Total P&L:{RESET} {BOLD}{tot_col}{tot_arrow} "
+        f"{abs(tot_pnl):.0f} ({abs(pnl_pct):.2f}%){RESET}"
+    )
+    _print(_row(pnl_summary, NEON_CYAN))
+    _print(f"{SOFT_CYAN}{BL}{HL * (W - 2)}{BR}{RESET}")
+    _print()
+
+
+def news_feed_panel(articles: list):
+    """
+    Market news card feed with sentiment badges.
+    Each card: headline, source, time, sentiment (Bullish/Bearish/Neutral).
+    """
+    _print()
+    now = datetime.datetime.now().strftime("%H:%M:%S")
+    chip = (
+        f" {BOLD}{NEON_CYAN}📰 MARKET NEWS{RESET}  "
+        f"{DEEP_GREY}{DOT}{RESET}  {DIM}{MID_GREY}{now}{RESET} "
+    )
+    chip_v = _vis_len(chip)
+    rfill  = W - 2 - chip_v
+    _print(f"{NEON_CYAN}{TL}{RESET}{chip}{SOFT_CYAN}{HL * max(0, rfill)}{TR}{RESET}")
+
+    for i, article in enumerate(articles):
+        headline  = article.get("headline", "No headline")
+        source    = article.get("source", "")
+        ts        = article.get("time", "")
+        sentiment = article.get("sentiment", "Neutral")
+        badge     = _sentiment_badge(sentiment)
+
+        # ── Headline (word-wrapped to panel width) ────────────────────────────
+        max_width   = W - 6
+        words       = headline.split()
+        lines, cur  = [], ""
+        for word in words:
+            test = (cur + " " + word).strip()
+            if len(test) <= max_width:
+                cur = test
+            else:
+                if cur:
+                    lines.append(cur)
+                cur = word
+        if cur:
+            lines.append(cur)
+
+        # Separator before each article
+        _print(_row(f"  {DEEP_GREY}{HL2 * (W - 6)}{RESET}", NEON_CYAN))
+
+        for j, line in enumerate(lines):
+            col = NEON_WHITE if j == 0 else _rgb(180, 200, 225)
+            _print(_row(f"  {BOLD}{col}{line}{RESET}", NEON_CYAN))
+
+        meta = (
+            f"  {badge}  "
+            f"{DEEP_GREY}{source}{RESET}  "
+            f"{DIM}{MID_GREY}{ts}{RESET}"
+        )
+        _print(_row(meta, NEON_CYAN))
+
+    _print(f"{SOFT_CYAN}{BL}{HL * (W - 2)}{BR}{RESET}")
+    _print()
+
+
+def watchlist_panel(items: list):
+    """
+    Watchlist panel with ticker, current price, change, and alert status.
+    """
+    _print()
+    now = datetime.datetime.now().strftime("%H:%M:%S")
+    chip = (
+        f" {BOLD}{NEON_CYAN}🔔 WATCHLIST{RESET}  "
+        f"{DEEP_GREY}{DOT}{RESET}  {DIM}{MID_GREY}{now}{RESET} "
+    )
+    chip_v = _vis_len(chip)
+    rfill  = W - 2 - chip_v
+    _print(f"{NEON_CYAN}{TL}{RESET}{chip}{SOFT_CYAN}{HL * max(0, rfill)}{TR}{RESET}")
+    _print(_row("", NEON_CYAN))
+
+    hdr = (
+        f"  {BOLD}{NEON_WHITE}"
+        f"{'TICKER':<14}{'PRICE':>12}  {'CHG%':>8}  {'ALERT':>10}  STATUS{RESET}"
+    )
+    _print(_row(hdr, NEON_CYAN))
+    _print(_row(f"  {DEEP_GREY}{HL2 * (W - 6)}{RESET}", NEON_CYAN))
+
+    for item in items:
+        chg_col   = _pnl_color(item.get("change_pct"))
+        arrow     = "▲" if (item.get("change_pct") or 0) >= 0 else "▼"
+        triggered = "⚡" if item.get("triggered") else " "
+
+        ticker_s  = f"{BOLD}{NEON_WHITE}{triggered}{item['ticker']:<13}{RESET}"
+        price_s   = (
+            f"{_rgb(220,240,255)}{item['price']:>12.2f}{RESET}"
+            if item.get("price") else f"{MID_GREY}{'N/A':>12}{RESET}"
+        )
+        chg_s     = (
+            f"{chg_col}{arrow}{item['change_pct']:>7.2f}%{RESET}"
+            if item.get("change_pct") is not None else f"{MID_GREY}{'N/A':>8}{RESET}"
+        )
+        alert_s   = (
+            f"{NEON_YELLOW}{item['alert_price']:>10.2f}{RESET}"
+            if item.get("alert_price") else f"{MID_GREY}{'–':>10}{RESET}"
+        )
+        status_s  = f"{DIM}{MID_GREY}{item.get('status','')[:20]}{RESET}"
+
+        row_content = f"  {ticker_s}  {price_s}  {chg_s}  {alert_s}  {status_s}"
+        _print(_row(row_content, NEON_CYAN))
+
+    _print(f"{SOFT_CYAN}{BL}{HL * (W - 2)}{BR}{RESET}")
+    _print()
+
+
+def market_alert(ticker: str, message: str):
+    """
+    Urgent neon-yellow market alert box — for price threshold breaches.
+    Wraps the existing reminder_box style but with a stock-specific icon.
+    """
+    _print()
+    chip   = f" {BOLD}{NEON_YELLOW}⚡  MARKET ALERT  —  {ticker}{RESET} "
+    chip_v = _vis_len(chip)
+    rfill  = W - 2 - chip_v
+    _print(f"{NEON_YELLOW}{TL}{RESET}{chip}{NEON_YELLOW}{HL * max(0, rfill)}{TR}{RESET}")
+    content = f"  {BOLD}{NEON_WHITE}{message}{RESET}"
+    _print(_row(content, NEON_YELLOW))
+    _print(f"{NEON_YELLOW}{BL}{HL * (W - 2)}{BR}{RESET}")
     _print()

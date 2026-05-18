@@ -1,11 +1,11 @@
 """
 skills/study.py
 ───────────────
-Study / explain skill powered by Ollama.
+Study / explain skill powered by OpenRouter (DeepSeek-R1).
 
-All queries are routed to the Ollama reasoning core for accurate, dynamic
+All queries are routed to the OpenRouter reasoning core for accurate, dynamic
 responses instead of a hardcoded keyword bank.
-Falls back to a generic prompt message when Ollama is unavailable.
+Falls back to a generic prompt message when OpenRouter is unavailable.
 """
 
 from core.logger import log
@@ -39,19 +39,19 @@ class StudySkill:
         )
         prompt = f"{mode.capitalize()} '{topic}' in a clear, conversational way suitable for spoken delivery."
 
-        log.info(f"[StudySkill] Routing to Ollama — mode={mode}, topic='{topic}'")
+        log.info(f"[StudySkill] Routing to OpenRouter — mode={mode}, topic='{topic}'")
 
-        # Instantiate brain and ask Ollama directly
+        # Instantiate brain and ask the AI directly
         brain = Brain()
-        result = brain.ask_ollama(prompt)
+        result = brain.ask_ai(prompt)
 
         if result:
             return result
 
-        # Graceful fallback when Ollama is offline
+        # Graceful fallback when OpenRouter is offline
         return (
             f"My reasoning core is offline. I can't dynamically explain {topic} right now. "
-            "Try again when the Ollama service is running."
+            "Try again after setting your OPENROUTER_API_KEY in the .env file."
         )
 
     def _extract_topic(self, command: str, keywords: list) -> str:

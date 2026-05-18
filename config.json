@@ -14,5 +14,10 @@
   "news_country": "in",
   "news_category": "technology",
   "mic_device_index": null,
-  "ollama_model": "mistral"
+  "openrouter_model": "deepseek/deepseek-r1:free",
+  "openrouter_fallback_model": "meta-llama/llama-4-scout:free",
+  "alpha_vantage_api_key": "GET_FREE_KEY_AT_alphavantage.co",
+  "finnhub_api_key": "GET_FREE_KEY_AT_finnhub.io",
+  "stock_cache_ttl_seconds": 300,
+  "watchlist_poll_interval_seconds": 60
 }

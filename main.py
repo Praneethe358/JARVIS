@@ -25,7 +25,8 @@ import time
 import os
 import sys
 import threading
-import requests       # used for the Ollama health check on boot
+import urllib.request
+import urllib.error
 import core.ui as ui
 from core.voice      import VoiceEngine
 from core.brain      import Brain
@@ -41,6 +42,7 @@ from skills.notes    import NotesSkill
 from skills.personal import PersonalAssistantSkill
 from skills.analytics import AnalyticsSkill
 from skills.study    import StudySkill
+from skills.stock    import StockSkill
 from core.router     import CommandRouter
 from core.logger     import log
 
@@ -85,6 +87,7 @@ class NEXUS:
             PersonalAssistantSkill(),
             AnalyticsSkill(),
             StudySkill(),
+            StockSkill(),
         ]
         self.router = CommandRouter(skills, self.brain)
         self.personal = next((s for s in skills if s.__class__.__name__ == "PersonalAssistantSkill"), None)
@@ -97,29 +100,47 @@ class NEXUS:
         # Animated boot sequence
         ui.boot_sequence()
 
-        # ── Ollama health check ───────────────────────────────────────
-        # Ping Ollama on startup; disable reasoning core and warn if unreachable.
-        self._ollama_ok = self._check_ollama()
-        self.brain.ollama_available = self._ollama_ok
+        # ── OpenRouter health check ────────────────────────────────────────
+        # Ping OpenRouter on startup; disable reasoning core and warn if unreachable.
+        self._openrouter_ok = self._check_openrouter()
+        self.brain.openrouter_available = self._openrouter_ok
 
         log.info("All systems online. NEXUS ready.")
 
+        # ── Start watchlist polling thread ────────────────────────────────
+        try:
+            from skills.stock_watchlist import start_watchlist_polling
+            start_watchlist_polling()
+            log.info("Watchlist price alert polling: STARTED")
+        except Exception as e:
+            log.warning(f"Could not start watchlist polling: {e}")
+
     # ──────────────────────────────────────────────────────
-    def _check_ollama(self) -> bool:
+    def _check_openrouter(self) -> bool:
         """
-        Ping Ollama's base endpoint to verify the service is running.
+        Check if OpenRouter API key is configured and the service is reachable.
         Logs a warning and returns False if unreachable so the rest of
         the system can degrade gracefully to skill-only mode.
         """
+        from core.config import CONFIG
+        api_key = CONFIG.get("openrouter_api_key", "")
+        if not api_key or api_key == "your_openrouter_api_key_here":
+            log.warning("OPENROUTER_API_KEY not set — reasoning core disabled.")
+            ui.status("OpenRouter API key not configured — add to .env", "warn")
+            return False
         try:
-            resp = requests.get("http://localhost:11434", timeout=3)
-            if resp.status_code == 200:
-                log.info("Ollama health check: ONLINE")
-                return True
+            req = urllib.request.Request(
+                "https://openrouter.ai/api/v1/models",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                if resp.status == 200:
+                    log.info("OpenRouter health check: ONLINE")
+                    return True
         except Exception:
             pass
-        log.warning("Ollama health check: UNREACHABLE — reasoning core disabled.")
-        ui.status("Reasoning core (Ollama) is OFFLINE — skill-only mode", "warn")
+        log.warning("OpenRouter health check: UNREACHABLE — reasoning core disabled.")
+        ui.status("Reasoning core (OpenRouter) is OFFLINE — skill-only mode", "warn")
         return False
 
     # ──────────────────────────────────────────────────────
@@ -141,7 +162,7 @@ class NEXUS:
 
         # ── Startup announcement ───────────────────────────────────────
         # Announce full operational status or degraded mode depending on Ollama health.
-        if self._ollama_ok:
+        if self._openrouter_ok:
             self.voice.speak("NEXUS online. All systems operational. Reasoning core active.")
         else:
             self.voice.speak(
