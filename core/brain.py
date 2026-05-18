@@ -201,6 +201,8 @@ class Brain:
 
         OpenRouter uses the OpenAI-compatible messages array format:
           [{"role": "system", ...}, {"role": "user", ...}, ...]
+          
+        Includes a self-healing fallback retry loop for free model endpoints.
         """
         if not self._api_key:
             log.error("OPENROUTER_API_KEY is not set. Check your .env file.")
@@ -218,53 +220,79 @@ class Brain:
 
         messages.append({"role": "user", "content": user_input})
 
-        payload = json.dumps({
-            "model": self._model,
-            "messages": messages,
-            "max_tokens": 512,
-            "temperature": 0.7,
-        }).encode("utf-8")
+        # ── Self-healing model fallback list ─────────────────────────────────
+        models_to_try = [self._model]
+        fallbacks = [
+            "deepseek/deepseek-v4-flash:free",
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "google/gemma-4-31b-it:free",
+            "liquid/lfm-2.5-1.2b-thinking:free",
+            "arcee-ai/trinity-large-thinking:free"
+        ]
+        for f in fallbacks:
+            if f not in models_to_try:
+                models_to_try.append(f)
 
-        # ── POST via urllib ──────────────────────────────────────────────────
-        try:
-            req = urllib.request.Request(
-                _OPENROUTER_URL,
-                data=payload,
-                headers={
-                    "Authorization"  : f"Bearer {self._api_key}",
-                    "Content-Type"   : "application/json",
-                    "HTTP-Referer"   : _OPENROUTER_REFERER,
-                    "X-Title"        : _OPENROUTER_TITLE,
-                },
-                method="POST",
-            )
-            # Timeout: 30s — OpenRouter is cloud-based, fast
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                # OpenAI-compatible response format
-                choices = data.get("choices", [])
-                if not choices:
-                    log.warning(f"OpenRouter returned empty choices: {data}")
-                    return ""
-                return choices[0].get("message", {}).get("content", "").strip()
+        # ── POST via urllib with retries ─────────────────────────────────────
+        for attempt_model in models_to_try:
+            payload = json.dumps({
+                "model": attempt_model,
+                "messages": messages,
+                "max_tokens": 512,
+                "temperature": 0.7,
+            }).encode("utf-8")
 
-        except urllib.error.HTTPError as e:
-            body = e.read().decode("utf-8", errors="ignore")
-            log.error(f"OpenRouter HTTP error: {e.code} {e.reason} — {body[:200]}")
-            # 429 = rate limit, 402 = quota — don't disable permanently
-            if e.code not in (429, 402):
+            try:
+                req = urllib.request.Request(
+                    _OPENROUTER_URL,
+                    data=payload,
+                    headers={
+                        "Authorization"  : f"Bearer {self._api_key}",
+                        "Content-Type"   : "application/json",
+                        "HTTP-Referer"   : _OPENROUTER_REFERER,
+                        "X-Title"        : _OPENROUTER_TITLE,
+                    },
+                    method="POST",
+                )
+                # Timeout: 30s — OpenRouter is cloud-based, fast
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    choices = data.get("choices", [])
+                    if not choices:
+                        log.warning(f"OpenRouter returned empty choices for {attempt_model}: {data}")
+                        continue
+                    
+                    if attempt_model != self._model:
+                        log.info(f"OpenRouter: successfully recovered using fallback model '{attempt_model}'")
+                    return choices[0].get("message", {}).get("content", "").strip()
+
+            except urllib.error.HTTPError as e:
+                body = e.read().decode("utf-8", errors="ignore")
+                
+                # Check for 404 (Not Found), 400 (Bad Request), or error message containing "model"
+                if e.code in (404, 400) or "model" in body.lower():
+                    log.warning(f"Model '{attempt_model}' returned HTTP {e.code}. OpenRouter response: {body[:120]}. Trying next fallback model...")
+                    continue
+                
+                log.error(f"OpenRouter HTTP error: {e.code} {e.reason} — {body[:200]}")
+                # 429 = rate limit, 402 = quota — don't disable permanently
+                if e.code not in (429, 402):
+                    self.openrouter_available = False
+                return ""
+            except urllib.error.URLError as e:
+                log.error(f"OpenRouter connection error for model {attempt_model}: {e.reason}")
                 self.openrouter_available = False
-            return ""
-        except urllib.error.URLError as e:
-            log.error(f"OpenRouter connection error: {e.reason}")
-            self.openrouter_available = False
-            return ""
-        except TimeoutError:
-            log.warning("OpenRouter request timed out — will retry on next command.")
-            return ""
-        except Exception as e:
-            log.error(f"OpenRouter query failed: {e}")
-            return ""
+                return ""
+            except TimeoutError:
+                log.warning(f"OpenRouter request timed out for model {attempt_model} — trying next fallback...")
+                continue
+            except Exception as e:
+                log.error(f"OpenRouter query failed for model {attempt_model}: {e}")
+                continue
+                
+        # All models failed
+        log.error("All OpenRouter models in the fallback chain returned errors.")
+        return ""
 
     def _local_reply(self, user_input: str) -> str:
         """
