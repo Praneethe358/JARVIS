@@ -16,7 +16,7 @@ class OpenRouterLLM:
         self.history = []
         self.cache = {}
         self.model = LLM_MODEL_DEFAULT
-        self.max_history = 6 # Keep last 6 messages
+        self.max_history = 10 # Keep last 10 messages
 
     def clear_memory(self):
         self.history.clear()
@@ -50,13 +50,17 @@ class OpenRouterLLM:
         messages.append({"role": "user", "content": full_prompt})
 
         # ── Fallback Loop ────────────────────────────────────────────────────
-        models_to_try = [self.model, LLM_MODEL_FALLBACK, "deepseek/deepseek-v4-flash:free", "meta-llama/llama-3.3-70b-instruct:free"]
-        # Remove duplicates preserving order
-        models_to_try = list(dict.fromkeys(models_to_try))
+        models_to_try = [
+            "openrouter/free",
+            "meta-llama/llama-4-scout:free",
+            "meta-llama/llama-4-maverick:free",
+            "google/gemini-2.0-flash-exp:free",
+            "mistralai/mistral-small-3:free",
+            "deepseek/deepseek-r1:free"
+        ]
 
-        print(f"\r[⚡] Thinking...")
-        
         for attempt_model in models_to_try:
+            print(f"\r[⚡] Thinking ({attempt_model})...")
             payload = {
                 "model": attempt_model,
                 "messages": messages,
@@ -72,15 +76,16 @@ class OpenRouterLLM:
                     timeout=30
                 )
                 
-                # Check for 404/400 (Not Found / Bad Request) to trigger fallback
-                if response.status_code in [404, 400]:
+                # Check for errors (404, 429, 500, etc)
+                if response.status_code != 200:
+                    print(f"\r[🔴] Model {attempt_model} failed with HTTP {response.status_code}. Trying next...")
                     continue
                     
-                response.raise_for_status()
                 data = response.json()
                 
                 choices = data.get("choices", [])
                 if not choices:
+                    print(f"\r[🔴] Model {attempt_model} returned empty response. Trying next...")
                     continue
                     
                 reply = choices[0].get("message", {}).get("content", "").strip()
@@ -101,7 +106,11 @@ class OpenRouterLLM:
                 self.cache[cache_key] = (reply, time.time())
                 return reply
                 
-            except Exception:
+            except requests.exceptions.Timeout:
+                print(f"\r[🔴] Model {attempt_model} timed out. Trying next...")
+                continue
+            except Exception as e:
+                print(f"\r[🔴] Model {attempt_model} exception: {e}. Trying next...")
                 continue
 
-        return "I'm having trouble connecting to my reasoning core right now."
+        return "NEXUS offline. Try again shortly."

@@ -19,7 +19,7 @@ FINNHUB_API_KEY       = os.getenv("FINNHUB_API_KEY", "")
 
 # ── LLM SETTINGS (OpenRouter) ───────────────────────────────────────
 OPENROUTER_URL        = "https://openrouter.ai/api/v1/chat/completions"
-LLM_MODEL_DEFAULT     = "deepseek/deepseek-r1:free"
+LLM_MODEL_DEFAULT     = "openrouter/free"
 LLM_MODEL_FALLBACK    = "meta-llama/llama-4-scout:free"
 LLM_SYSTEM_PROMPT     = (
     "You are NEXUS, an advanced AI voice assistant with financial "
@@ -27,7 +27,9 @@ LLM_SYSTEM_PROMPT     = (
     "stocks, gold, crypto, news, science, casual conversation, or "
     "personal queries. Be concise and sharp. For voice output, "
     "keep responses under 3 sentences unless the user asks for detail. "
-    "Never say you cannot answer a general question — reason through it."
+    "Never say you cannot answer a general question — reason through it. "
+    "If the user asks you to open, show, find, or search for something online, "
+    "respond ONLY with: [BROWSER:https://full-url-here]"
 )
 LLM_HEADERS           = {
     "Authorization": f"Bearer {OPENROUTER_API_KEY}",

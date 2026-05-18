@@ -43,8 +43,42 @@ class IntentRouter:
                 context = "\n".join(lines)
 
         # ── 3. Commodity / General Investment ───────────────────────────────
-        # For commodities like gold/silver, if we had a commodity API we'd fetch it here.
-        # Otherwise, the LLM will answer generally. We leave context empty to let
-        # the LLM use its general knowledge for commodities or generic investment advice.
+        commodity_words = ["gold", "silver", "crude", "oil", "platinum", "copper"]
+        rate_words = ["rate", "price", "today", "current", "now", "how much", "worth", "trading"]
+        
+        has_commodity = any(c in text_lower for c in commodity_words)
+        has_rate = any(r in text_lower for r in rate_words)
+        
+        if has_commodity and has_rate:
+            commodity_map = {
+                "gold": "GC=F",
+                "silver": "SI=F",
+                "crude": "CL=F",
+                "oil": "CL=F",
+                "platinum": "PL=F",
+                "copper": "HG=F"
+            }
+            
+            # Find which commodity was asked about
+            detected_commodity = None
+            for c in commodity_words:
+                if c in text_lower:
+                    detected_commodity = c
+                    break
+            
+            if detected_commodity:
+                ticker = commodity_map.get(detected_commodity)
+                quote = get_quote(ticker)
+                
+                if quote and not quote.get("error"):
+                    context = (
+                        f"Live market data: {detected_commodity.upper()} is currently at "
+                        f"{quote['price']} {quote.get('currency', 'USD')}."
+                    )
+                else:
+                    context = (
+                        f"Live fetch failed for {detected_commodity.upper()}. "
+                        "Answer from general knowledge and clearly state data may not be current."
+                    )
 
         return context

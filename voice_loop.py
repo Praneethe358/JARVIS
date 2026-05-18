@@ -58,6 +58,17 @@ class VoiceLoop:
             
             # 4. Speak response
             ui.status("SPEAKING", "wait")
+            
+            # Post-process for Browser intent
+            if reply.startswith("[BROWSER:"):
+                try:
+                    import webbrowser
+                    url = reply.replace("[BROWSER:", "").replace("]", "").strip()
+                    webbrowser.open(url)
+                    reply = "Opening that in your browser."
+                except Exception as e:
+                    reply = f"I tried to open the browser but encountered an error."
+
             self._display_nexus_reply(reply)
             self.tts.speak(reply)
             
